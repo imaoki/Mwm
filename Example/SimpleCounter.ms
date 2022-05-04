@@ -1,6 +1,6 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /* Define Model */
-struct ExampleCounterModelStruct (
+struct SimpleCounterStruct (
   /*- @prop <Integer> */
   private count = 0,
 
@@ -18,7 +18,7 @@ struct ExampleCounterModelStruct (
   public fn Load config = (
     local isSuccessful = false
     if this.isValidConfig config do (
-      local table = config.GetValue #CounterModel
+      local table = config.GetValue #SimpleCounter
       if classOf table == Dictionary do (
         if hasDictValue table #Count do this.SetCount table[#Count]
         isSuccessful = true
@@ -36,7 +36,7 @@ struct ExampleCounterModelStruct (
     if this.isValidConfig config do (
       local table = Dictionary #Name
       table[#Count] = this.GetCount()
-      config.AddValue #CounterModel table
+      config.AddValue #SimpleCounter table
       isSuccessful = true
     )
     isSuccessful
@@ -79,14 +79,14 @@ struct ExampleCounterModelStruct (
   local countProperty = ::mwm.CreateProperty #Count 0 \
       modelAttribute:(
         ::mwm.CreateModelAttribute \
-            #CounterModel \
+            #SimpleCounter \
             propertyName:#Count \
             getterName:#GetCount \
             setterName:#SetCount
       )
 
   /* Create ViewModel Command */
-  local commandAttribute = ::mwm.CreateModelAttribute #CounterModel
+  local commandAttribute = ::mwm.CreateModelAttribute #SimpleCounter
   local incrementCommand = ::mwm.CreateCommand #Increment \
       executeFunction:(
         fn executeIncrement model params event = (
@@ -106,9 +106,9 @@ struct ExampleCounterModelStruct (
   decrementCommand.AddExecuteProperty countProperty
 
   /* Define View */
-  rollout RltCounterView "Counter" (
+  rollout RltMain "Counter" (
     /* Specify the name of the corresponding ViewModel */
-    local DataContext = #CounterViewModel
+    local DataContext = #SimpleCounterViewModel
 
     editText EdtCounter "Counter"
     button BtnIncrement "+"
@@ -150,13 +150,13 @@ struct ExampleCounterModelStruct (
         DataContext.SetBinding incrementBinding
         DataContext.SetBinding decrementBinding
       )
-      EventNotify RltCounterView #Open #()
+      EventNotify RltMain #Open #()
       ok
     )
 
-    on RltCounterView Close do EventNotify RltCounterView #Close #()
-    on RltCounterView Moved v do EventNotify RltCounterView #Moved #(v)
-    on RltCounterView Resized v do EventNotify RltCounterView #Resized #(v)
+    on RltMain Close do EventNotify RltMain #Close #()
+    on RltMain Moved v do EventNotify RltMain #Moved #(v)
+    on RltMain Resized v do EventNotify RltMain #Resized #(v)
 
     on EdtCounter Entered v do EventNotify EdtCounter #Entered #(v)
     on BtnIncrement Pressed do EventNotify BtnIncrement #Pressed #()
@@ -164,32 +164,36 @@ struct ExampleCounterModelStruct (
   )
 
   /* Create View Instance */
-  local view = ::std.DialogStruct RltCounterView [160, 160]
+  local view = ::std.DialogStruct RltMain [160, 160]
 
   /* Create Model Instance */
-  global exampleCounterModel = ::ExampleCounterModelStruct()
+  global simpleCounterModel = ::SimpleCounterStruct()
 
   /* Build ViewModel */
-  local viewModel = ::mwm.CreateViewModel #CounterViewModel
-  viewModel.AddModel #CounterModel ::exampleCounterModel
+  local viewModel = ::mwm.CreateViewModel #SimpleCounterViewModel
+  viewModel.AddModel #SimpleCounter ::simpleCounterModel
   viewModel.AddProperty countProperty
   viewModel.AddCommand incrementCommand
   viewModel.AddCommand decrementCommand
 
   /* Build Application */
-  global exampleCounterApplication = ::mwm.CreateApplication \
-      #CounterApplication #RltCounterView applicationFile:(getSourceFileName())
-  ::exampleCounterApplication.AddModel #CounterModel ::exampleCounterModel
-  ::exampleCounterApplication.AddView view
-  ::exampleCounterApplication.AddViewModel viewModel
+  global simpleCounterApplication = ::mwm.CreateApplication \
+      #CounterApplication #RltMain applicationFile:(getSourceFileName())
+  ::simpleCounterApplication.AddModel #SimpleCounter ::simpleCounterModel
+  ::simpleCounterApplication.AddView view
+  ::simpleCounterApplication.AddViewModel viewModel
 
   /* Running Application */
-  ::exampleCounterApplication.Run()
+  ::simpleCounterApplication.Run()
 
   /* Manipulate model values directly */
-  -- ::exampleCounterModel.SetCount 99
+  /*
+  ::simpleCounterModel.SetCount 99
+  */
 
   /* Shutdown Application */
-  -- ::exampleCounterApplication.Shutdown()
+  /*
+  ::simpleCounterApplication.Shutdown()
+  */
   ok
 )
