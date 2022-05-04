@@ -7,6 +7,8 @@
 ::MwmApplicationStruct applicationName startupViewName applicationFile
 ```
 
+* アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。
+
 * 設定ファイルを作りたくない場合はアプリケーションファイルを未定義にする。
 
 通知
@@ -358,6 +360,7 @@ struct MwmApplicationStruct (
   アプリケーションファイルのパスを設定する。
   @param input <String|UndefinedClass>
   @returns <String|UndefinedClass>
+  @remarks アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。
   */
   public fn SetApplicationFile input = (
     if (classOf input == String and ::std.FileUtility.FileExists input) \
