@@ -74,10 +74,10 @@ A simple counter application will be used as an example and explained step by st
 01. [Define Model](#define-model)
     <!-- Modelを定義 -->
 
-02. [Create ViewModel Property](create-viewmodel-property)
+02. [Create ViewModel Property](#create-viewmodel-property)
     <!-- ViewModelのプロパティを作成 -->
 
-03. [Create ViewModel Command](create-viewmodel-command)
+03. [Create ViewModel Command](#create-viewmodel-command)
     <!-- ViewModelのコマンドを作成 -->
 
 04. [Define View](#define-view)
