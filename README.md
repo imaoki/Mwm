@@ -509,7 +509,10 @@ struct ExampleCounterModelStruct (
 ```
 
 * Specify the filename of the application definition source in the keyword argument `applicationFile`.
-<!-- キーワード引数`applicationFile`にアプリケーション定義元のファイル名を指定する。 -->
+  <!-- キーワード引数`applicationFile`にアプリケーション定義元のファイル名を指定する。 -->
+
+* The configuration file path is the one with the application file extension changed to `.mxsconfig`.
+  <!-- アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。 -->
 
 ## License
 <!-- ライセンス -->
