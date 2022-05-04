@@ -72,16 +72,16 @@ A simple counter application will be used as an example and explained step by st
 <!-- シンプルなカウンターアプリケーションを例に、順を追って解説する。 -->
 
 01. [Define Model](#define-model)
-    <!-- Modelを定義 -->
+    <!-- モデルを定義 -->
 
 02. [Create ViewModel Property](#create-viewmodel-property)
-    <!-- ViewModelのプロパティを作成 -->
+    <!-- ビューモデルのプロパティを作成 -->
 
 03. [Create ViewModel Command](#create-viewmodel-command)
-    <!-- ViewModelのコマンドを作成 -->
+    <!-- ビューモデルのコマンドを作成 -->
 
 04. [Define View](#define-view)
-    <!-- Viewを定義 -->
+    <!-- ビューを定義 -->
 
     01. [Define Rollout](#define-rollout)
         <!-- ロールアウトを定義 -->
@@ -90,13 +90,13 @@ A simple counter application will be used as an example and explained step by st
         <!-- データバインディング -->
 
 05. [Create View Instance](#create-view-instance)
-    <!-- Viewインスタンスを作成 -->
+    <!-- ビューインスタンスを作成 -->
 
 06. [Create Model Instance](#create-model-instance)
-    <!-- Modelインスタンスを作成 -->
+    <!-- モデルインスタンスを作成 -->
 
 07. [Build ViewModel](#build-viewmodel)
-    <!-- ViewModelを構築 -->
+    <!-- ビューモデルを構築 -->
 
 08. [Build Application](#build-application)
     <!-- アプリケーションを構築 -->
@@ -105,11 +105,10 @@ A simple counter application will be used as an example and explained step by st
     <!-- アプリケーションを開始 -->
 
 ### Define Model
-<!-- Modelを定義 -->
+<!-- モデルを定義 -->
 
 ```maxscript
-/* Define Model */
-struct ExampleCounterModelStruct (
+struct SimpleCounterStruct (
   /*- @prop <Integer> */
   private count = 0,
 
@@ -156,15 +155,14 @@ struct ExampleCounterModelStruct (
   <!-- 既定以外の名前を使用する場合は`ModelAttribute`にて指定する。 -->
 
 ### Create ViewModel Property
-<!-- ViewModelのプロパティを作成 -->
+<!-- ビューモデルのプロパティを作成 -->
 
 ```maxscript
 (
-  /* Create ViewModel Property */
   local countProperty = ::mwm.CreateProperty #Count 0 \
       modelAttribute:(
         ::mwm.CreateModelAttribute \
-            #CounterModel \
+            #SimpleCounter \
             propertyName:#Count \
             getterName:#GetCount \
             setterName:#SetCount
@@ -172,12 +170,15 @@ struct ExampleCounterModelStruct (
 )
 ```
 
+* Specify `ModelAttribute` when referring to Model properties.
+  <!-- モデルのプロパティを参照する場合は`ModelAttribute`を指定する。 -->
+
 * To change the property name of an observable object from the default
   <!-- 観察可能オブジェクトのプロパティ名を既定から変更する場合 -->
 
   ```maxscript
     local countAttribute = ::mwm.CreateModelAttribute \
-        #CounterModel \
+        #SimpleCounter \
         propertyName:#Count \
         getterName:#GetCount \
         setterName:#SetCount
@@ -188,12 +189,11 @@ struct ExampleCounterModelStruct (
   ```
 
 ### Create ViewModel Command
-<!-- ViewModelのコマンドを作成 -->
+<!-- ビューモデルのコマンドを作成 -->
 
 ```maxscript
 (
-  /* Create ViewModel Command */
-  local commandAttribute = ::mwm.CreateModelAttribute #CounterModel
+  local commandAttribute = ::mwm.CreateModelAttribute #SimpleCounter
   local incrementCommand = ::mwm.CreateCommand #Increment \
       executeFunction:(
         fn executeIncrement model params event = (
@@ -218,17 +218,16 @@ struct ExampleCounterModelStruct (
   <!-- コマンド用の`ModelAttribute`はモデル名だけ指定すればよい。 -->
 
 ### Define View
-<!-- Viewを定義 -->
+<!-- ビューを定義 -->
 
 #### Define Rollout
 <!-- ロールアウトを定義 -->
 
 ```maxscript
 (
-  /* Define View */
-  rollout RltCounterView "Counter" (
+  rollout RltMain "Counter" (
     /* Specify the name of the corresponding ViewModel */
-    local DataContext = #CounterViewModel
+    local DataContext = #SimpleCounterViewModel
 
     editText EdtCounter "Counter"
     button BtnIncrement "+"
@@ -257,13 +256,13 @@ struct ExampleCounterModelStruct (
       if ::mwm.IsValidViewModel obj do (
         DataContext = obj
       )
-      EventNotify RltCounterView #Open #()
+      EventNotify RltMain #Open #()
       ok
     )
 
-    on RltCounterView Close do EventNotify RltCounterView #Close #()
-    on RltCounterView Moved v do EventNotify RltCounterView #Moved #(v)
-    on RltCounterView Resized v do EventNotify RltCounterView #Resized #(v)
+    on RltMain Close do EventNotify RltMain #Close #()
+    on RltMain Moved v do EventNotify RltMain #Moved #(v)
+    on RltMain Resized v do EventNotify RltMain #Resized #(v)
 
     on EdtCounter Entered v do EventNotify EdtCounter #Entered #(v)
     on BtnIncrement Pressed do EventNotify BtnIncrement #Pressed #()
@@ -279,7 +278,7 @@ struct ExampleCounterModelStruct (
     <!-- ローカル変数`DataContext` -->
 
     * Specify and store ViewModel.
-      <!-- ViewModelの指定および格納。 -->
+      <!-- ビューモデルの指定および格納。 -->
 
   * Local function `EventNotify`
     <!-- ローカル関数`EventNotify` -->
@@ -304,8 +303,7 @@ struct ExampleCounterModelStruct (
 
 ```maxscript
 (
-  /* Define View */
-  rollout RltCounterView "Counter" (
+  rollout RltMain "Counter" (
     -- ...
     /*-
     @param obj <Struct:MwmViewModelStruct>
@@ -328,7 +326,7 @@ struct ExampleCounterModelStruct (
         DataContext.SetBinding incrementBinding
         DataContext.SetBinding decrementBinding
       )
-      EventNotify RltCounterView #Open #()
+      EventNotify RltMain #Open #()
       ok
     )
     -- ...
@@ -337,36 +335,33 @@ struct ExampleCounterModelStruct (
 ```
 
 ### Create View Instance
-<!-- Viewインスタンスを作成 -->
+<!-- ビューインスタンスを作成 -->
 
 ```maxscript
 (
-  /* Create View Instance */
-  local view = ::std.DialogStruct RltCounterView [160, 160]
+  local view = ::std.DialogStruct RltMain [160, 160]
 )
 ```
 
 ### Create Model Instance
-<!-- Modelインスタンスを作成 -->
+<!-- モデルインスタンスを作成 -->
 
 ```maxscript
 (
-  /* Create Model Instance */
-  global exampleCounterModel = ::ExampleCounterModelStruct()
+  global simpleCounterModel = ::SimpleCounterStruct()
 )
 ```
 
 * Global variable for directly manipulating Model property values to see if they are reflected in the UI.
-  <!-- Modelのプロパティ値を直接操作してUIに反映されるか確認するためのグローバル変数。 -->
+  <!-- モデルのプロパティ値を直接操作してUIに反映されるか確認するためのグローバル変数。 -->
 
 ### Build ViewModel
-<!-- ViewModelを構築 -->
+<!-- ビューモデルを構築 -->
 
 ```maxscript
 (
-  /* Build ViewModel */
-  local viewModel = ::mwm.CreateViewModel #CounterViewModel
-  viewModel.AddModel #CounterModel ::exampleCounterModel
+  local viewModel = ::mwm.CreateViewModel #SimpleCounterViewModel
+  viewModel.AddModel #SimpleCounter ::simpleCounterModel
   viewModel.AddProperty countProperty
   viewModel.AddCommand incrementCommand
   viewModel.AddCommand decrementCommand
@@ -378,11 +373,10 @@ struct ExampleCounterModelStruct (
 
 ```maxscript
 (
-  /* Build Application */
-  global exampleCounterApplication = ::mwm.CreateApplication #CounterApplication #RltCounterView
-  ::exampleCounterApplication.AddModel #CounterModel ::exampleCounterModel
-  ::exampleCounterApplication.AddView view
-  ::exampleCounterApplication.AddViewModel viewModel
+  global simpleCounterApplication = ::mwm.CreateApplication #CounterApplication #RltMain
+  ::simpleCounterApplication.AddModel #SimpleCounter ::simpleCounterModel
+  ::simpleCounterApplication.AddView view
+  ::simpleCounterApplication.AddViewModel viewModel
 )
 ```
 
@@ -391,8 +385,7 @@ struct ExampleCounterModelStruct (
 
 ```maxscript
 (
-  /* Running Application */
-  ::exampleCounterApplication.Run()
+  ::simpleCounterApplication.Run()
 )
 ```
 
@@ -406,14 +399,14 @@ struct ExampleCounterModelStruct (
   <!-- `EditTextControl`に入力した値がModelに反映されるか。 -->
 
   ```maxscript
-  ::exampleCounterModel.GetCount()
+  ::simpleCounterModel.GetCount()
   ```
 
 * Is it reflected in the UI when Model property values are changed directly?
-  <!-- Modelのプロパティ値を直接変更した場合にUIに反映されるか。 -->
+  <!-- モデルのプロパティ値を直接変更した場合にUIに反映されるか。 -->
 
   ```maxscript
-  ::exampleCounterModel.SetCount 99
+  ::simpleCounterModel.SetCount 99
   ```
 
 <!-- ## Limitations -->
@@ -435,12 +428,11 @@ struct ExampleCounterModelStruct (
 <!-- 設定ファイルの使用 -->
 
 #### Model Implementation
-<!-- Modelの実装 -->
+<!-- モデルの実装 -->
 
 ```maxscript
 (
-/* Define Model */
-struct ExampleCounterModelStruct (
+struct SimpleCounterStruct (
   -- ...
 
   /*-
@@ -450,7 +442,7 @@ struct ExampleCounterModelStruct (
   public fn Load config = (
     local isSuccessful = false
     if this.isValidConfig config do (
-      local table = config.GetValue #CounterModel
+      local table = config.GetValue #SimpleCounter
       if classOf table == Dictionary do (
         if hasDictValue table #Count do this.SetCount table[#Count]
         isSuccessful = true
@@ -468,7 +460,7 @@ struct ExampleCounterModelStruct (
     if this.isValidConfig config do (
       local table = Dictionary #Name
       table[#Count] = this.GetCount()
-      config.AddValue #CounterModel table
+      config.AddValue #SimpleCounter table
       isSuccessful = true
     )
     isSuccessful
@@ -501,9 +493,8 @@ struct ExampleCounterModelStruct (
 
 ```maxscript
 (
-  /* Build Application */
-  global exampleCounterApplication = ::mwm.CreateApplication \
-      #CounterApplication #RltCounterView applicationFile:(getSourceFileName())
+  global simpleCounterApplication = ::mwm.CreateApplication \
+      #CounterApplication #RltMain applicationFile:(getSourceFileName())
   -- ...
 )
 ```
