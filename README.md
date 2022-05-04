@@ -62,7 +62,7 @@ Execute `uninstall.ms`.
 <!-- アンインストールする -->
 
 ```maxscript
-::foo.Uninstall()
+::mwm.Uninstall()
 ```
 
 ## Usage
