@@ -58,14 +58,17 @@ struct MwmViewModelStruct (
   public fn HasCommand key = (),
   public fn HasModel key = (),
   public fn HasProperty key = (),
+  public fn Load config = (),
   public fn RaiseTargetChanged event = (),
   public fn RefreshBinding = (),
+  public fn Save config = (),
   public fn SetBinding binding = (),
   public fn SetPropertyValue propertyName propertyValue = (),
   public fn SetViewModelName input = (),
 
   private fn isValidBinding obj = (),
   private fn isValidCommand obj = (),
+  private fn isValidConfig obj = (),
   private fn isValidControl obj = (),
   private fn isValidEvent obj = (),
   private fn isValidModel obj = (),
@@ -402,6 +405,24 @@ struct MwmViewModelStruct (
   ),
 
   /*-
+  @param config <Struct:ConfigStruct>
+  @returns <BooleanClass>
+  */
+  public fn Load config = (
+    local isSuccessful = false
+    if this.isValidConfig config and classOf this.viewModelName == Name do (
+      for propertyName in this.propertyTable.Keys do (
+        local property = this.propertyTable[propertyName]
+        if this.isValidProperty property do (
+          property.Load config this.viewModelName
+        )
+      )
+      isSuccessful = true
+    )
+    isSuccessful
+  ),
+
+  /*-
   ターゲットオブジェクトの変更通知を発行する。
   @param event <Struct:MwmEventStruct> イベントオブジェクト。
   @returns <OkClass>
@@ -428,6 +449,24 @@ struct MwmViewModelStruct (
       )
     )
     ok
+  ),
+
+  /*-
+  @param config <Struct:ConfigStruct>
+  @returns <BooleanClass>
+  */
+  public fn Save config = (
+    local isSuccessful = false
+    if this.isValidConfig config and classOf this.viewModelName == Name do (
+      for propertyName in this.propertyTable.Keys do (
+        local property = this.propertyTable[propertyName]
+        if this.isValidProperty property do (
+          property.Save config this.viewModelName
+        )
+      )
+      isSuccessful = true
+    )
+    isSuccessful
   ),
 
   /*-
@@ -513,6 +552,17 @@ struct MwmViewModelStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidConfig obj = (
+    isStruct obj \
+        and isProperty obj #StructName \
+        and classOf obj.StructName == MAXScriptFunction \
+        and obj.StructName() == #ConfigStruct
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidControl obj = (
     classOf obj == RolloutClass or superClassOf obj == RolloutControl
   ),
@@ -578,7 +628,7 @@ struct MwmViewModelStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を持つオブジェクトにモデルオブジェクトを設定する。
+  モデル属性を持つオブジェクトにモデルオブジェクトを設定する。
   @param obj <Struct>
   @returns <BooleanClass> 設定に成功した場合は`true`、失敗した場合は`false`。
   */

@@ -1,6 +1,6 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
-モデルのプロパティ情報を格納する構造体。
+モデル属性を格納する構造体。
 @remarks インスタンス作成時のパラメータ指定順は以下の通り。
 
 ```maxscript

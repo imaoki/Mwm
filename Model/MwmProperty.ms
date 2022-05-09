@@ -1,7 +1,8 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 ビューモデルにプロパティを定義するための構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
+@remarks モデル属性が未定義の場合は設定オブジェクトに値が保存される。
+インスタンス作成時のパラメータ指定順は以下の通り。
 
 ```maxscript
 ::MwmPropertyStruct propertyName propertyValue [modelAttribute]
@@ -25,12 +26,12 @@ struct MwmPropertyStruct (
   public _CP1_,
   /*- @prop <Any> 作成パラメータ2。プロパティ値。既定値は`undefined`。 */
   public _CP2_,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ3。モデルのプロパティ情報。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ3。モデル属性。既定値は`undefined`。 */
   public _CP3_,
 
   /*- @prop <Struct|UndefinedClass> モデルオブジェクト。既定値は`undefined`。 */
   private model,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデルのプロパティ情報。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。 */
   private modelAttribute,
   /*- @prop <Name> プロパティ名。バインディングのソース名。既定値は`undefined`。 */
   private propertyName,
@@ -42,15 +43,19 @@ struct MwmPropertyStruct (
   public fn GetModelAttribute = (),
   public fn GetPropertyName = (),
   public fn GetPropertyValue = (),
+  public fn Load config viewModelName = (),
+  public fn Save config viewModelName = (),
   public fn SetModel obj = (),
   public fn SetModelAttribute obj = (),
   public fn SetPropertyName input = (),
   public fn SetPropertyValue input = (),
   public fn SynchronizeWithModel type param = (),
 
+  private fn generateConfigKey viewModelName = (),
   private fn getGetterMethod = (),
   private fn getModelObservable = (),
   private fn getSetterMethod = (),
+  private fn isValidConfig obj = (),
   private fn isValidModel obj = (),
   private fn isValidModelAttribute obj = (),
   private fn isValidObservable obj = (),
@@ -68,7 +73,7 @@ struct MwmPropertyStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を取得する。
+  モデル属性を取得する。
   @returns <Struct:MwmModelAttributeStruct|UndefinedClass>
   */
   public fn GetModelAttribute = (
@@ -92,6 +97,44 @@ struct MwmPropertyStruct (
   ),
 
   /*-
+  @param config <Struct:ConfigStruct>
+  @param viewModelName <Name> ビューモデル名。
+  @returns <BooleanClass>
+  @remarks モデル属性が未定義の場合にのみ値を読み込む。
+  */
+  public fn Load config viewModelName = (
+    local isSuccessful = false
+    if this.isValidConfig config \
+        and classOf viewModelName == Name \
+        and not this.isValidModelAttribute this.modelAttribute \
+        and classOf this.propertyName == Name do (
+      local key = this.generateConfigKey viewModelName
+      this.SetPropertyValue (config.GetValue key)
+      isSuccessful = true
+    )
+    isSuccessful
+  ),
+
+  /*-
+  @param config <Struct:ConfigStruct>
+  @param viewModelName <Name> ビューモデル名。
+  @returns <BooleanClass>
+  @remarks モデル属性が未定義の場合にのみ値を保存する。
+  */
+  public fn Save config viewModelName = (
+    local isSuccessful = false
+    if this.isValidConfig config \
+        and classOf viewModelName == Name \
+        and not this.isValidModelAttribute this.modelAttribute \
+        and classOf this.propertyName == Name do (
+      local key = this.generateConfigKey viewModelName
+      config.AddValue key this.propertyValue
+      isSuccessful = true
+    )
+    isSuccessful
+  ),
+
+  /*-
   モデルオブジェクトを設定する。
   @param obj <Struct|UndefinedClass>
   @returns <Struct|UndefinedClass>
@@ -109,7 +152,7 @@ struct MwmPropertyStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を設定する。
+  モデル属性を設定する。
   @param obj <Struct:MwmModelAttributeStruct|UndefinedClass>
   @returns <Struct:MwmModelAttributeStruct|UndefinedClass>
   @remarks 無効な値の場合は何もしない。
@@ -174,6 +217,15 @@ struct MwmPropertyStruct (
   ),
 
   /*-
+  コンフィグ用のキーを生成する。
+  @param viewModelName <Name>
+  @returns <Name>
+  */
+  private fn generateConfigKey viewModelName = (
+    (viewModelName as String + "." + this.propertyName as String) as Name
+  ),
+
+  /*-
   モデルのプロパティ値取得メソッドを取得する。
   @returns <MAXScriptFunction|UndefinedClass>
   */
@@ -220,6 +272,17 @@ struct MwmPropertyStruct (
       )
     )
     setterMethod
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidConfig obj = (
+    isStruct obj \
+        and isProperty obj #StructName \
+        and classOf obj.StructName == MAXScriptFunction \
+        and obj.StructName() == #ConfigStruct
   ),
 
   /*-

@@ -32,7 +32,7 @@ struct MwmCommandStruct (
   public _CP2_,
   /*- @prop <MAXScriptFunction|UndefinedClass> 作成パラメータ3。コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。 */
   public _CP3_,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ4。モデルのプロパティ情報。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ4。モデル属性。既定値は`undefined`。 */
   public _CP4_,
 
   /*- @prop <MAXScriptFunction|UndefinedClass> コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。 */
@@ -47,7 +47,7 @@ struct MwmCommandStruct (
   private executeProperties = #(),
   /*- @prop <Struct|UndefinedClass> モデルオブジェクト。既定値は`undefined`。 */
   private model,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデルのプロパティ情報。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。 */
   private modelAttribute,
   /*- @prop <MAXScriptFunction|UndefinedClass> コマンドを実行する後に呼び出される関数。既定値は`undefined`。 */
   private postProcessFunction,
@@ -253,7 +253,7 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を取得する。
+  モデル属性を取得する。
   @returns <Struct:MwmModelAttributeStruct|UndefinedClass>
   */
   public fn GetModelAttribute = (
@@ -410,7 +410,7 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を設定する。
+  モデル属性を設定する。
   @param obj <Struct:MwmModelAttributeStruct|UndefinedClass>
   @returns <Struct:MwmModelAttributeStruct|UndefinedClass>
   @remarks 無効な値の場合は何もしない。

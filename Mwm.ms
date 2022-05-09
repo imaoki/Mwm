@@ -109,7 +109,7 @@ struct MwmStruct (
   @param commandName <Name> コマンド名。
   @param executeFunction: <MAXScriptFunction|UndefinedClass> コマンドの内容を定義した関数。既定値は`undefined`。
   @param canExecuteFunction: <MAXScriptFunction|UndefinedClass> コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。
-  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデルのプロパティ情報。既定値は`undefined`。
+  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
   @returns <Struct:MwmCommandStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
@@ -172,7 +172,7 @@ struct MwmStruct (
   ),
 
   /*-
-  モデルのプロパティ情報を作成する。
+  モデル属性を作成する。
   @param modelName <Name> モデル名。
   @param propertyName: <Name|UndefinedClass> モデルのプロパティ名。既定値は`undefined`。
   @param getterName: <Name|UndefinedClass> モデルのプロパティ値取得メソッド名。既定値は`undefined`。
@@ -192,7 +192,7 @@ struct MwmStruct (
   プロパティを作成する。
   @param propertyName <Name> プロパティ名。
   @param propertyValue <Any> プロパティ値。
-  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデルのプロパティ情報。既定値は`undefined`。
+  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
   @returns <Struct:MwmPropertyStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
@@ -334,7 +334,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "1.0.0",
+  private version = "1.1.0",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,

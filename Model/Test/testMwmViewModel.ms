@@ -205,6 +205,7 @@
     ok
   )
 
+  local config = ::std.ConfigStruct()
   local converter = converterDef testToTargetFunction testToSourceFunction
   local model = TestModelStruct()
   local modelAttribute = modelAttributeDef #TestModel
@@ -352,6 +353,18 @@
   assert (actual.Equals expected == true)
   -- 名前
   actual = ::TestValueStruct (testObj.HasProperty #Count)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
+  /* Load */
+  -- ビューモデル名が未定義なので失敗
+  actual = ::TestValueStruct (testObj.Load config)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
+  /* Save */
+  -- ビューモデル名が未定義なので失敗
+  actual = ::TestValueStruct (testObj.Save config)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
@@ -870,6 +883,18 @@
   -- `increment`バインディングオブジェクト
   actual = ::TestValueStruct (testObj.HasBindingByName #Increment #Btn)
   expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
+  /* Save */
+  -- 成功
+  actual = ::TestValueStruct (testObj.Save config)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+
+  /* Load */
+  -- 成功
+  actual = ::TestValueStruct (testObj.Load config)
+  expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 
   /* 作成パラメータ */

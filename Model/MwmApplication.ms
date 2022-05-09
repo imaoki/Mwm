@@ -312,6 +312,12 @@ struct MwmApplicationStruct (
           model.Load this.config
         )
       )
+      for viewModelName in this.viewModelTable.Keys do (
+        local viewModel = this.viewModelTable[viewModelName]
+        if this.isValidViewModel viewModel do (
+          viewModel.Load this.config
+        )
+      )
       for viewName in this.viewTable.Keys do (
         local view = this.viewTable[viewName]
         if this.isValidView view do (
@@ -430,6 +436,12 @@ struct MwmApplicationStruct (
             and isProperty model #Save \
             and classOf model.Save == MAXScriptFunction do (
           model.Save this.config
+        )
+      )
+      for viewModelName in this.viewModelTable.Keys do (
+        local viewModel = this.viewModelTable[viewModelName]
+        if this.isValidViewModel viewModel do (
+          viewModel.Save this.config
         )
       )
       for viewName in this.viewTable.Keys do (

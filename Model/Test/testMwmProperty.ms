@@ -142,6 +142,7 @@
     ok
   )
 
+  local config = ::std.ConfigStruct()
   local model = TestModelStruct()
   local modelAttribute = modelAttributeDef #TestModel #Count #GetCount #SetCount
   local property2 = undefined
@@ -178,6 +179,26 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
+  /* Load */
+  -- プロパティ名未定義なので失敗
+  actual = ::TestValueStruct (testObj.Load config #TestViewModel)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- プロパティ値を確認
+  actual = ::TestValueStruct (testObj.GetPropertyValue())
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+
+  /* Save */
+  -- プロパティ名未定義なので失敗
+  actual = ::TestValueStruct (testObj.Save config #TestViewModel)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- 設定オブジェクトのキーを確認
+  actual = ::TestValueStruct (config.HasValue #'TestViewModel.Count')
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
   /* SetModel */
   -- 無効な値
   actual = ::TestValueStruct (testObj.SetModel 0)
@@ -189,11 +210,11 @@
   actual = ::TestValueStruct (testObj.SetModel model)
   expected = ::TestValueStruct expectedModel
   assert (actual.Equals expected == true)
-  -- 通知元の購読を確認（モデルのプロパティ情報が未設定なので失敗）
+  -- 通知元の購読を確認（モデル属性が未設定なので失敗）
   actual = ::TestValueStruct (model.StateChanged.HasSubscribed testObj.SynchronizeWithModel)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- プロパティ値を確認（モデルのプロパティ情報が未設定なので同期されない）
+  -- プロパティ値を確認（モデル属性が未設定なので同期されない）
   actual = ::TestValueStruct (testObj.GetPropertyValue())
   expected = ::TestValueStruct expectedPropertyValue
   assert (actual.Equals expected == true)
@@ -240,6 +261,65 @@
   expectedPropertyValue = 0
   actual = ::TestValueStruct (testObj.SynchronizeWithModel #Count 0)
   expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+
+  /* Load */
+  -- モデル属性が設定されているので失敗
+  actual = ::TestValueStruct (testObj.Load config #TestViewModel)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- プロパティ値を確認
+  actual = ::TestValueStruct (testObj.GetPropertyValue())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+
+  /* Save */
+  -- モデル属性が設定されているので失敗
+  actual = ::TestValueStruct (testObj.Save config #TestViewModel)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- 設定オブジェクトのキーを確認
+  actual = ::TestValueStruct (config.HasValue #'TestViewModel.Count')
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
+  /* SetModelAttribute */
+  -- 未定義に設定
+  expectedModelAttribute = undefined
+  actual = ::TestValueStruct (testObj.SetModelAttribute undefined)
+  expected = ::TestValueStruct expectedModelAttribute
+  assert (actual.Equals expected == true)
+
+  /* Save */
+  -- 成功
+  actual = ::TestValueStruct (testObj.Save config #TestViewModel)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 設定オブジェクトのキーを確認
+  actual = ::TestValueStruct (config.HasValue #'TestViewModel.Count')
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 設定オブジェクトの値を確認
+  actual = ::TestValueStruct (config.GetValue #'TestViewModel.Count')
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+
+  /* SetPropertyValue */
+  -- 成功
+  expectedPropertyValue = 3
+  actual = ::TestValueStruct (testObj.SetPropertyValue 3)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+
+  /* Load */
+  -- 成功
+  expectedPropertyValue = 0
+  actual = ::TestValueStruct (testObj.Load config #TestViewModel)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- プロパティ値を確認
+  actual = ::TestValueStruct (testObj.GetPropertyValue())
+  expected = ::TestValueStruct expectedPropertyValue
   assert (actual.Equals expected == true)
 
   -- testObj.Dump()
