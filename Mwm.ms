@@ -138,7 +138,7 @@ struct MwmStruct (
     if classOf commandName == Name \
         and this.isValidControl target \
         and classOf targetEventName == Name do (
-      binding = this.bindingDef commandName target targetEventName
+      binding = this.bindingDef 1 commandName target targetEventName
     )
     binding
   ),
@@ -210,6 +210,14 @@ struct MwmStruct (
 
   /*-
   ターゲットオブジェクトとプロパティとのバインディングを作成する。
+  @param mode <Integer> バインディングにおけるデータフローの方向。
+  有効な値は次の通り。
+
+  | 値  | 名前             | 動作                                                                 |
+  | --- | ---------------- | -------------------------------------------------------------------- |
+  | `1` | `TwoWay`         | ソースまたはターゲットのいずれかが変更されるともう一方も更新される。 |
+  | `2` | `OneWay`         | ソースが変更されるとターゲットも更新される。                         |
+  | `3` | `OneWayToSource` | ターゲットが変更されるとソースも更新される。                         |
   @param propertyName <Name> プロパティ名。
   @param target <RolloutClass|RolloutControl> ターゲットオブジェクト。
   @param targetEventName <Name> ターゲットオブジェクトのイベント名。
@@ -217,13 +225,14 @@ struct MwmStruct (
   @returns <Struct:MwmBindingStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
-  public fn CreatePropertyBinding propertyName target targetEventName targetPropertyName = (
+  public fn CreatePropertyBinding mode propertyName target targetEventName targetPropertyName = (
     local binding = undefined
-    if classOf propertyName == Name \
+    if classOf mode == Integer \
+        and classOf propertyName == Name \
         and this.isValidControl target \
         and classOf targetEventName == Name \
         and classOf targetPropertyName == Name do (
-      binding = this.bindingDef propertyName target targetEventName targetPropertyName
+      binding = this.bindingDef mode propertyName target targetEventName targetPropertyName
     )
     binding
   ),
@@ -375,7 +384,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "2.0.0",
+  private version = "2.1.0",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,

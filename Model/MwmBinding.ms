@@ -3,13 +3,14 @@
 データバインディングの仕組みを提供する。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmBindingStruct sourceName target targetEventName [targetPropertyName]
+    ::MwmBindingStruct mode sourceName target targetEventName [targetPropertyName]
     ```
 
 通知
 :   | 通知名                        | 通知データ                                      | タイミング                                           |
     | ----------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
     | `#Converter`                  | 新たな`converter`値                             | `converter`を設定した後                              |
+    | `#Mode`                       | 新たな`mode`値                                  | `mode`を設定した後                                   |
     | `#Source`                     | 新たな`source`値                                | `source`を設定した後                                 |
     | `#SourceName`                 | 新たな`sourceName`値                            | `sourceName`を設定した後                             |
     | `#SourceValueChanged`         | `undefined`                                     | ソースの値を設定した後                               |
@@ -28,17 +29,21 @@
     | `MwmViewModelStruct.targetChanged`   | `TargetChanged` |
 */
 struct MwmBindingStruct (
-  /*- @prop <Name> 作成パラメータ1。ソース名。プロパティオブジェクトまたはコマンドオブジェクトの名前。既定値は`undefined`。 */
-  public _CP1_,
-  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> 作成パラメータ2。ターゲットオブジェクト。既定値は`undefined`。 */
+  /*- @prop <Name> 作成パラメータ1。バインディングにおけるデータフローの方向。既定値は`1`。 */
+  public _CP1_ = 1,
+  /*- @prop <Name> 作成パラメータ2。ソース名。プロパティオブジェクトまたはコマンドオブジェクトの名前。既定値は`undefined`。 */
   public _CP2_,
-  /*- @prop <Name> 作成パラメータ3。ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
+  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> 作成パラメータ3。ターゲットオブジェクト。既定値は`undefined`。 */
   public _CP3_,
-  /*- @prop <Name|UndefinedClass> 作成パラメータ4。ターゲットオブジェクトのプロパティ名。既定値は`undefined`。 */
+  /*- @prop <Name> 作成パラメータ4。ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
   public _CP4_,
+  /*- @prop <Name|UndefinedClass> 作成パラメータ5。ターゲットオブジェクトのプロパティ名。既定値は`undefined`。 */
+  public _CP5_,
 
   /*- @prop <Struct:MwmConverterStruct> ソース-ターゲット間の値のコンバータ。既定値は`undefined`。 */
   private converter,
+  /*- @prop <Integer> バインディングにおけるデータフローの方向。既定値は`1`。 */
+  private mode = 1,
   /*- @prop <Struct:MwmCommandStruct|Struct:MwmPropertyStruct> ソースオブジェクト。既定値は`undefined`。 */
   private source,
   /*- @prop <Name> ソース名。プロパティオブジェクトまたはコマンドオブジェクトの名前。既定値は`undefined`。 */
@@ -52,6 +57,7 @@ struct MwmBindingStruct (
 
   /*
   public fn GetConverter = (),
+  public fn GetMode = (),
   public fn GetSource = (),
   public fn GetSourceName = (),
   public fn GetSourceValue = (),
@@ -63,6 +69,7 @@ struct MwmBindingStruct (
   public fn GetTargetPropertyValue = (),
   public fn Refresh = (),
   public fn SetConverter obj = (),
+  public fn SetMode input = (),
   public fn SetSource obj = (),
   public fn SetSourceName input = (),
   public fn SetSourceValue input = (),
@@ -95,6 +102,14 @@ struct MwmBindingStruct (
   */
   public fn GetConverter = (
     this.converter
+  ),
+
+  /*-
+  バインディングにおけるデータフローの方向を取得する。
+  @returns <Integer>
+  */
+  public fn GetMode = (
+    this.mode
   ),
 
   /*-
@@ -230,6 +245,26 @@ struct MwmBindingStruct (
       this.StateChanged.Notify #Converter this.converter
     )
     this.GetConverter()
+  ),
+
+  /*-
+  バインディングにおけるデータフローの方向を設定する。
+  @param input <Integer> 有効な値は次の通り。
+
+  | 値  | 名前             | 動作                                                                 |
+  | --- | ---------------- | -------------------------------------------------------------------- |
+  | `1` | `TwoWay`         | ソースまたはターゲットのいずれかが変更されるともう一方も更新される。 |
+  | `2` | `OneWay`         | ソースが変更されるとターゲットも更新される。                         |
+  | `3` | `OneWayToSource` | ターゲットが変更されるとソースも更新される。                         |
+  @returns <Integer>
+  @remarks 無効な値の場合は何もしない。
+  */
+  public fn SetMode input = (
+    if classOf input == Integer and 1 <= input and input <= 3 do (
+      this.mode = input
+      this.StateChanged.Notify #Mode this.mode
+    )
+    this.GetMode()
   ),
 
   /*-
@@ -371,7 +406,11 @@ struct MwmBindingStruct (
   public fn SourceChanged type param = (
     case type of (
       (#CanExecuteChanged): this.updateTargetEnabled()
-      (#PropertyValue): this.updateTargetPropertyValue()
+      (#PropertyValue): (
+        if #{1, 2}[this.mode] do (
+          this.updateTargetPropertyValue()
+        )
+      )
       default: ()
     )
     ok
@@ -394,7 +433,7 @@ struct MwmBindingStruct (
             this.source.Execute param
           )
           else (
-            if this.isValidProperty this.source do (
+            if this.isValidProperty this.source and #{1, 3}[this.mode] do (
               this.SetSourceValue (this.GetTargetPropertyValue())
             )
           )
@@ -563,6 +602,7 @@ struct MwmBindingStruct (
     else (
       format "%  converter:%\n" indent this.converter to:out
     )
+    format "%  mode:%\n" indent this.mode to:out
     if this.isValidCommand this.source or this.isValidProperty this.source then (
       format "%  source:\n" indent to:out
       this.source.Dump indent:(indent + "    ") out:out
@@ -591,6 +631,9 @@ struct MwmBindingStruct (
     local isEqualProperties = true \
         and isProperty obj #GetConverter \
         and classOf obj.GetConverter == MAXScriptFunction \
+        and isProperty obj #GetMode \
+        and classOf obj.GetMode == MAXScriptFunction \
+        and obj.GetMode() == this.GetMode() \
         and isProperty obj #GetSource \
         and classOf obj.GetSource == MAXScriptFunction \
         and isProperty obj #GetSourceName \
@@ -636,9 +679,10 @@ struct MwmBindingStruct (
 
   on Create do (
     this.StateChanged = ::std.ObservableStruct()
-    this.SetSourceName this._CP1_
-    this.SetTarget this._CP2_
-    this.SetTargetEventName this._CP3_
-    this.SetTargetPropertyName this._CP4_
+    this.SetMode this._CP1_
+    this.SetSourceName this._CP2_
+    this.SetTarget this._CP3_
+    this.SetTargetEventName this._CP4_
+    this.SetTargetPropertyName this._CP5_
   )
 )

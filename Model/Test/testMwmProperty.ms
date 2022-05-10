@@ -327,24 +327,15 @@
   /* 作成パラメータ */
   testObj = testDef #Count 0 modelAttribute
   testObj.StateChanged.Subscribe testNotification
-
-  /* GetModel */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetModel())
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetModelAttribute */
+  -- GetModelAttribute
   actual = ::TestValueStruct (testObj.GetModelAttribute())
   expected = ::TestValueStruct modelAttribute
   assert (actual.Equals expected == true)
-
-  /* GetPropertyName */
+  -- GetPropertyName
   actual = ::TestValueStruct (testObj.GetPropertyName())
   expected = ::TestValueStruct #Count
   assert (actual.Equals expected == true)
-
-  /* GetPropertyValue */
+  -- GetPropertyValue
   actual = ::TestValueStruct (testObj.GetPropertyValue())
   expected = ::TestValueStruct 0
   assert (actual.Equals expected == true)

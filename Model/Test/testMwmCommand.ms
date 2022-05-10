@@ -591,23 +591,15 @@
   testObj = testDef #Submit testExecuteFunction testCanExecuteFunction modelAttribute
   testObj.CanExecuteChanged.Subscribe testNotification
   testObj.StateChanged.Subscribe testNotification
-
-  /* GetCanExecuteFunction */
+  -- GetCanExecuteFunction
   actual = ::TestValueStruct (testObj.GetCanExecuteFunction())
   expected = ::TestValueStruct testCanExecuteFunction
   assert (actual.Equals expected == true)
-
-  /* GetExecuteFunction */
+  -- GetExecuteFunction
   actual = ::TestValueStruct (testObj.GetExecuteFunction())
   expected = ::TestValueStruct testExecuteFunction
   assert (actual.Equals expected == true)
-
-  /* GetModel */
-  actual = ::TestValueStruct (testObj.GetModel())
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetModelAttribute */
+  -- GetModelAttribute
   actual = ::TestValueStruct (testObj.GetModelAttribute())
   expected = ::TestValueStruct modelAttribute
   assert (actual.Equals expected == true)

@@ -222,9 +222,9 @@
   incrementCommand.AddCanExecuteProperty stepProperty
   incrementCommand.AddExecuteProperty stepProperty
 
-  local countBinding = bindingDef #Count RltTest.Edt #Entered #Text
+  local countBinding = bindingDef 1 #Count RltTest.Edt #Entered #Text
   countBinding.SetConverter converter
-  local incrementBinding = bindingDef #Increment RltTest.Btn #Pressed
+  local incrementBinding = bindingDef 1 #Increment RltTest.Btn #Pressed
 
   local viewModel2 = undefined
 

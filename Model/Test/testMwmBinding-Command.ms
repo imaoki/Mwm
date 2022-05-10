@@ -170,6 +170,7 @@
   )
 
   local expectedConverter = undefined
+  local expectedMode = 1
   local expectedSource = undefined
   local expectedSourceName = undefined
   local expectedSourceValue = undefined
@@ -186,6 +187,11 @@
       (#Converter): (
         actual = ::TestValueStruct (testObj.GetConverter())
         expected = ::TestValueStruct expectedConverter
+        assert (actual.Equals expected == true)
+      )
+      (#Mode): (
+        actual = ::TestValueStruct (testObj.GetMode())
+        expected = ::TestValueStruct expectedMode
         assert (actual.Equals expected == true)
       )
       (#Source): (
@@ -274,6 +280,12 @@
   -- 既定値
   actual = ::TestValueStruct (testObj.GetConverter())
   expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+
+  /* GetMode */
+  -- 既定値
+  actual = ::TestValueStruct (testObj.GetMode())
+  expected = ::TestValueStruct 1
   assert (actual.Equals expected == true)
 
   /* GetSource */
@@ -395,7 +407,7 @@
   actual = ::TestValueStruct (stepProperty.StateChanged.HasSubscribed testObj.SourceChanged)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -426,7 +438,7 @@
   actual = ::TestValueStruct (testObj.SetSourceValue 0)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -451,7 +463,7 @@
   actual = ::TestValueStruct (testObj.GetTargetEnabled())
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -476,7 +488,7 @@
   actual = ::TestValueStruct (testObj.SetTargetEnabled false)
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
@@ -513,7 +525,7 @@
   actual = ::TestValueStruct (testObj.SetTargetPropertyName #Caption)
   expected = ::TestValueStruct expectedTargetPropertyName
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -531,7 +543,7 @@
   actual = ::TestValueStruct (testObj.SetTargetPropertyValue 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -547,7 +559,7 @@
   actual = ::TestValueStruct (testObj.Refresh())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -566,7 +578,7 @@
   actual = ::TestValueStruct (testObj.SourceChanged #CanExecuteChanged false)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -588,7 +600,7 @@
   actual = ::TestValueStruct (testObj.SourceChanged #CanExecuteChanged true)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -601,7 +613,7 @@
   actual = ::TestValueStruct (stepProperty.GetPropertyValue())
   expected = ::TestValueStruct 1
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Btn.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -644,21 +656,41 @@
   expected = ::TestValueStruct 1
   assert (actual.Equals expected == true)
 
-  /* 作成パラメータ */
-  testObj = testDef #Increment RltTest.Btn #Pressed
-  testObj.StateChanged.Subscribe testNotification
+  /* SetMode */
+  -- 無効な値
+  actual = ::TestValueStruct (testObj.SetMode #2)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 無効な値（範囲外）
+  actual = ::TestValueStruct (testObj.SetMode 0)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 無効な値（範囲外）
+  actual = ::TestValueStruct (testObj.SetMode 4)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 成功
+  expectedMode = 2
+  actual = ::TestValueStruct (testObj.SetMode 2)
+  expected = ::TestValueStruct expectedMode
+  assert (actual.Equals expected == true)
 
-  /* GetSourceName */
+  /* 作成パラメータ */
+  testObj = testDef 3 #Increment RltTest.Btn #Pressed
+  testObj.StateChanged.Subscribe testNotification
+  -- GetMode
+  actual = ::TestValueStruct (testObj.GetMode())
+  expected = ::TestValueStruct 3
+  assert (actual.Equals expected == true)
+  -- GetSourceName
   actual = ::TestValueStruct (testObj.GetSourceName())
   expected = ::TestValueStruct #Increment
   assert (actual.Equals expected == true)
-
-  /* GetTarget */
+  -- GetTarget
   actual = ::TestValueStruct (testObj.GetTarget())
   expected = ::TestValueStruct RltTest.Btn
   assert (actual.Equals expected == true)
-
-  /* GetTargetEventName */
+  -- GetTargetEventName
   actual = ::TestValueStruct (testObj.GetTargetEventName())
   expected = ::TestValueStruct #Pressed
   assert (actual.Equals expected == true)
@@ -670,11 +702,11 @@
   assert (actual.Equals expected == false)
   -- 等しい
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct (testDef #Increment RltTest.Btn #Pressed)
+  expected = ::TestValueStruct (testDef 3 #Increment RltTest.Btn #Pressed)
   assert (actual.Equals expected == true)
 
   /* メニューアイテムとのバインディング */
-  testObj = testDef #Increment MnuTest.Mi #Picked
+  testObj = testDef 3 #Increment MnuTest.Mi #Picked
   testObj.StateChanged.Subscribe testNotification
   -- GetTarget
   actual = ::TestValueStruct (testObj.GetTarget())

@@ -164,6 +164,7 @@
   )
 
   local expectedConverter = undefined
+  local expectedMode = 1
   local expectedSource = undefined
   local expectedSourceName = undefined
   local expectedSourceValue = undefined
@@ -180,6 +181,11 @@
       (#Converter): (
         actual = ::TestValueStruct (testObj.GetConverter())
         expected = ::TestValueStruct expectedConverter
+        assert (actual.Equals expected == true)
+      )
+      (#Mode): (
+        actual = ::TestValueStruct (testObj.GetMode())
+        expected = ::TestValueStruct expectedMode
         assert (actual.Equals expected == true)
       )
       (#Source): (
@@ -261,6 +267,12 @@
   -- 既定値
   actual = ::TestValueStruct (testObj.GetConverter())
   expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+
+  /* GetMode */
+  -- 既定値
+  actual = ::TestValueStruct (testObj.GetMode())
+  expected = ::TestValueStruct 1
   assert (actual.Equals expected == true)
 
   /* GetSource */
@@ -384,7 +396,7 @@
   actual = ::TestValueStruct (stepProperty.StateChanged.HasSubscribed testObj.SourceChanged)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -425,7 +437,7 @@
   actual = ::TestValueStruct (testObj.SetSourceValue 10)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -453,7 +465,7 @@
   actual = ::TestValueStruct (testObj.GetTargetEnabled())
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -481,7 +493,7 @@
   actual = ::TestValueStruct (testObj.SetTargetEnabled false)
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -522,7 +534,7 @@
   actual = ::TestValueStruct (testObj.SetTargetPropertyName #Text)
   expected = ::TestValueStruct expectedTargetPropertyName
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -548,7 +560,7 @@
   actual = ::TestValueStruct (testObj.SetTargetPropertyValue "20")
   expected = ::TestValueStruct expectedTargetPropertyValue
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -568,7 +580,7 @@
   actual = ::TestValueStruct (testObj.Refresh())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
   expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
@@ -582,9 +594,9 @@
   actual = ::TestValueStruct (testObj.SourceChanged #PropertyValue 30)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
-  -- ターゲットオブジェクトの状態を確認
+  -- ターゲットの状態を確認
   actual = ::TestValueStruct RltTest.Edt.Enabled
-  expected = ::TestValueStruct expectedTargetEnabled
+  expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
   actual = ::TestValueStruct RltTest.Edt.Text
   expected = ::TestValueStruct "10"
@@ -599,26 +611,100 @@
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
 
-  /* 作成パラメータ */
-  testObj = testDef #Count RltTest.Edt #Entered #Text
-  testObj.StateChanged.Subscribe testNotification
+  /* SetMode */
+  -- 無効な値
+  actual = ::TestValueStruct (testObj.SetMode #2)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 無効な値（範囲外）
+  actual = ::TestValueStruct (testObj.SetMode 0)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 無効な値（範囲外）
+  actual = ::TestValueStruct (testObj.SetMode 4)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
 
-  /* GetSourceName */
+  /* SetMode */
+  -- `OneWay`に変更
+  expectedMode = 2
+  actual = ::TestValueStruct (testObj.SetMode 2)
+  expected = ::TestValueStruct expectedMode
+  assert (actual.Equals expected == true)
+  -- ソースを変更（期待値はコンバータを通した値）
+  expectedTargetPropertyValue = 100
+  actual = ::TestValueStruct (countProperty.SetPropertyValue 100)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct RltTest.Edt.Text
+  expected = ::TestValueStruct "100"
+  assert (actual.Equals expected == true)
+  -- ターゲットを変更
+  RltTest.Edt.Text = "30"
+  actual = ::TestValueStruct (
+    testObj.TargetChanged #TargetChanged (eventDef RltTest.Edt #Entered "30")
+  )
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ソースを確認
+  actual = ::TestValueStruct (countProperty.GetPropertyValue())
+  expected = ::TestValueStruct 100
+  assert (actual.Equals expected == true)
+
+  /* SetMode */
+  -- `OneWayToSource`に変更
+  expectedMode = 3
+  actual = ::TestValueStruct (testObj.SetMode 3)
+  expected = ::TestValueStruct expectedMode
+  assert (actual.Equals expected == true)
+  -- ソースを変更
+  actual = ::TestValueStruct (countProperty.SetPropertyValue 50)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct RltTest.Edt.Text
+  expected = ::TestValueStruct "30"
+  assert (actual.Equals expected == true)
+  -- ターゲットを変更（期待値はコンバータを通した値）
+  expectedSourceValue = "70"
+  RltTest.Edt.Text = "70"
+  actual = ::TestValueStruct (
+    testObj.TargetChanged #TargetChanged (eventDef RltTest.Edt #Entered "70")
+  )
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ソースを確認
+  actual = ::TestValueStruct (countProperty.GetPropertyValue())
+  expected = ::TestValueStruct 70
+  assert (actual.Equals expected == true)
+
+  /* 作成パラメータ */
+  testObj = testDef 1 #Count RltTest.Edt #Entered #Text
+  testObj.StateChanged.Subscribe testNotification
+  -- GetMode
+  actual = ::TestValueStruct (testObj.GetMode())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- GetSourceName
   actual = ::TestValueStruct (testObj.GetSourceName())
   expected = ::TestValueStruct #Count
   assert (actual.Equals expected == true)
-
-  /* GetTarget */
+  -- GetTarget
   actual = ::TestValueStruct (testObj.GetTarget())
   expected = ::TestValueStruct RltTest.Edt
   assert (actual.Equals expected == true)
-
-  /* GetTargetEventName */
+  -- GetTargetEventName
   actual = ::TestValueStruct (testObj.GetTargetEventName())
   expected = ::TestValueStruct #Entered
   assert (actual.Equals expected == true)
-
-  /* GetTargetPropertyName */
+  -- GetTargetPropertyName
   actual = ::TestValueStruct (testObj.GetTargetPropertyName())
   expected = ::TestValueStruct #Text
   assert (actual.Equals expected == true)
@@ -630,7 +716,7 @@
   assert (actual.Equals expected == false)
   -- 等しい
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct (testDef #Count RltTest.Edt #Entered #Text)
+  expected = ::TestValueStruct (testDef 1 #Count RltTest.Edt #Entered #Text)
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()

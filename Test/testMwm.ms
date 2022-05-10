@@ -320,44 +320,48 @@
   )
 
   /* CreatePropertyBinding */
-  -- 無効な値（コマンド名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding 0 RltTest.Edt #Entered #Text)
+  -- 無効な値（バインディングにおけるデータフローの方向）
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding #1 0 RltTest.Edt #Entered #Text)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 無効な値（プロパティ名）
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 0 RltTest.Edt #Entered #Text)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（ターゲットオブジェクト）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding #Count 0 #Entered #Text)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count 0 #Entered #Text)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（ターゲットのイベント名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding #Count RltTest.Edt 0 #Text)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt 0 #Text)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（ターゲットのプロパティ名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding #Count RltTest.Edt #Entered 0)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Entered 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 成功（ロールアウト定義）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding #Count RltTest #Open #Open) \
+    (testObj.CreatePropertyBinding 1 #Count RltTest #Open #Open) \
     #MwmBindingStruct
   )
   -- 成功（ロールアウトコントロール）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding #Count RltTest.Edt #Entered #Text) \
+    (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Entered #Text) \
     #MwmBindingStruct
   )
   -- 成功（メニュー定義）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding #Count MnuTest #Open #Open) \
+    (testObj.CreatePropertyBinding 1 #Count MnuTest #Open #Open) \
     #MwmBindingStruct
   )
   -- 成功（メニューアイテム）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding #Count MnuTest.Mi #Picked #Checked) \
+    (testObj.CreatePropertyBinding 1 #Count MnuTest.Mi #Picked #Checked) \
     #MwmBindingStruct
   )
 

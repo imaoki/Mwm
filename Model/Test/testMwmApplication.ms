@@ -662,23 +662,19 @@
   /* 作成パラメータ */
   testObj = testDef #TestApplication #RltTest currentFile
   testObj.StateChanged.Subscribe testNotification
-
-  /* GetApplicationFile */
+  -- GetApplicationFile
   actual = ::TestValueStruct (testObj.GetApplicationFile())
   expected = ::TestValueStruct currentFile
   assert (actual.Equals expected == true)
-
-  /* GetApplicationName */
+  -- GetApplicationName
   actual = ::TestValueStruct (testObj.GetApplicationName())
   expected = ::TestValueStruct #TestApplication
   assert (actual.Equals expected == true)
-
-  /* GetConfig */
+  -- GetConfig
   actual = ::TestValueStruct (testObj.GetConfig())
   expected = ::TestValueStruct (::std.ConfigStruct currentFile)
   assert (actual.Equals expected == true)
-
-  /* GetStartupViewName */
+  -- GetStartupViewName
   actual = ::TestValueStruct (testObj.GetStartupViewName())
   expected = ::TestValueStruct #RltTest
   assert (actual.Equals expected == true)
