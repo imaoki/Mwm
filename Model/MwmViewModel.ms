@@ -1,11 +1,10 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 ビューモデルを定義するための構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
-
-```maxscript
-::MwmViewModelStruct viewModelName
-```
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmViewModelStruct viewModelName
+    ```
 
 通知
 :   | 通知名           | 通知データ              | タイミング                                 |

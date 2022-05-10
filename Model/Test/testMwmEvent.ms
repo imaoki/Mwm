@@ -15,6 +15,11 @@
 
   format "[run %]@\"%\"\n" nowTime currentFile
   /* Setup Start ------------------------------------------------------------ */
+  local MnuTest
+  rcMenu MnuTest (
+    menuItem Mi "Increment"
+  )
+
   local RltTest
   rollout RltTest "Test" (
     button Btn "ButtonControl"
@@ -56,9 +61,21 @@
   actual = ::TestValueStruct (testObj.SetControl "Btn")
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功
+  -- 成功（ロールアウト定義）
+  actual = ::TestValueStruct (testObj.SetControl RltTest)
+  expected = ::TestValueStruct RltTest
+  assert (actual.Equals expected == true)
+  -- 成功（ロールアウトコントロール）
   actual = ::TestValueStruct (testObj.SetControl RltTest.Btn)
   expected = ::TestValueStruct RltTest.Btn
+  assert (actual.Equals expected == true)
+  -- 成功（メニュー定義）
+  actual = ::TestValueStruct (testObj.SetControl MnuTest)
+  expected = ::TestValueStruct MnuTest
+  assert (actual.Equals expected == true)
+  -- 成功（メニューアイテム）
+  actual = ::TestValueStruct (testObj.SetControl MnuTest.Mi)
+  expected = ::TestValueStruct MnuTest.Mi
   assert (actual.Equals expected == true)
 
   /* SetEventName */

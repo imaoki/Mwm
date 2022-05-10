@@ -84,6 +84,7 @@ struct SimpleCounterStruct (
             getterName:#GetCount \
             setterName:#SetCount
       )
+  local lockProperty = ::mwm.CreateProperty #Lock false
 
   /* Create ViewModel Command */
   local commandAttribute = ::mwm.CreateModelAttribute #SimpleCounter
@@ -93,8 +94,14 @@ struct SimpleCounterStruct (
           model.SetCount (params[1].Value + 1)
         )
       ) \
+      canExecuteFunction:(
+        fn canExecuteIncrement params = (
+          params.Count == 1 and params[1].Name == #Lock and params[1].Value == false
+        )
+      ) \
       modelAttribute:commandAttribute
   incrementCommand.AddExecuteProperty countProperty
+  incrementCommand.AddCanExecuteProperty lockProperty
 
   local decrementCommand = ::mwm.CreateCommand #Decrement \
       executeFunction:(
@@ -102,14 +109,68 @@ struct SimpleCounterStruct (
           model.SetCount (params[1].Value - 1)
         )
       ) \
+      canExecuteFunction:(
+        fn canExecuteDecrement params = (
+          params.Count == 1 and params[1].Name == #Lock and params[1].Value == false
+        )
+      ) \
       modelAttribute:commandAttribute
   decrementCommand.AddExecuteProperty countProperty
+  decrementCommand.AddCanExecuteProperty lockProperty
+
+  /* Define Menu */
+  rcMenu MnuMain (
+    /* Specify the name of the corresponding ViewModel */
+    local DataContext = #SimpleCounterViewModel
+
+    subMenu "Menu" (
+      menuItem MiIncrement "Increment"
+      menuItem MiDecrement "Decrement"
+    )
+
+    /*-
+    @param control <RolloutClass|RolloutControl>
+    @param eventName <Name>
+    @param params <Array[<Any>]|Any>
+    @returns <OkClass>
+    */
+    fn EventNotify control eventName params = (
+      if ::mwm.IsValidViewModel DataContext do (
+        DataContext.RaiseTargetChanged (
+          ::mwm.CreateEvent control eventName params
+        )
+      )
+      ok
+    )
+
+    /*-
+    @param obj <Struct:MwmViewModelStruct>
+    @returns <OkClass>
+    */
+    fn Initialize obj = (
+      if ::mwm.IsValidViewModel obj do (
+        DataContext = obj
+
+        /* Data Binding */
+        local incrementBinding = ::mwm.CreateCommandBinding #Increment MiIncrement #Picked
+        local decrementBinding = ::mwm.CreateCommandBinding #Decrement MiDecrement #Picked
+        DataContext.SetBinding incrementBinding
+        DataContext.SetBinding decrementBinding
+      )
+      EventNotify MnuMain #Open #()
+      ok
+    )
+
+    on MiIncrement Picked do EventNotify MiIncrement #Picked #()
+    on MiDecrement Picked do EventNotify MiDecrement #Picked #()
+  )
 
   /* Define View */
   rollout RltMain "Counter" (
     /* Specify the name of the corresponding ViewModel */
     local DataContext = #SimpleCounterViewModel
 
+    checkBox CkbxLock "Lock"
     editText EdtCounter "Counter"
     button BtnIncrement "+"
     button BtnDecrement "-"
@@ -144,9 +205,11 @@ struct SimpleCounterStruct (
               (fn integerAsString input = input as String) \
               (fn stringToInteger input = input as Integer)
         )
+        local lockBinding = ::mwm.CreatePropertyBinding #Lock CkbxLock #Changed #Checked
         local incrementBinding = ::mwm.CreateCommandBinding #Increment BtnIncrement #Pressed
         local decrementBinding = ::mwm.CreateCommandBinding #Decrement BtnDecrement #Pressed
         DataContext.SetBinding countBinding
+        DataContext.SetBinding lockBinding
         DataContext.SetBinding incrementBinding
         DataContext.SetBinding decrementBinding
       )
@@ -158,6 +221,7 @@ struct SimpleCounterStruct (
     on RltMain Moved v do EventNotify RltMain #Moved #(v)
     on RltMain Resized v do EventNotify RltMain #Resized #(v)
 
+    on CkbxLock Changed v do EventNotify CkbxLock #Changed #(v)
     on EdtCounter Entered v do EventNotify EdtCounter #Entered #(v)
     on BtnIncrement Pressed do EventNotify BtnIncrement #Pressed #()
     on BtnDecrement Pressed do EventNotify BtnDecrement #Pressed #()
@@ -165,6 +229,7 @@ struct SimpleCounterStruct (
 
   /* Create View Instance */
   local view = ::std.DialogStruct RltMain [160, 160]
+  view.SetMenuDef MnuMain
 
   /* Create Model Instance */
   global simpleCounterModel = ::SimpleCounterStruct()
@@ -173,6 +238,7 @@ struct SimpleCounterStruct (
   local viewModel = ::mwm.CreateViewModel #SimpleCounterViewModel
   viewModel.AddModel #SimpleCounter ::simpleCounterModel
   viewModel.AddProperty countProperty
+  viewModel.AddProperty lockProperty
   viewModel.AddCommand incrementCommand
   viewModel.AddCommand decrementCommand
 

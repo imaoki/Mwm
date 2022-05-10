@@ -1,11 +1,10 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 データバインディングの仕組みを提供する。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
-
-```maxscript
-::MwmBindingStruct sourceName target targetEventName [targetPropertyName]
-```
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmBindingStruct sourceName target targetEventName [targetPropertyName]
+    ```
 
 通知
 :   | 通知名                        | 通知データ                                      | タイミング                                           |
@@ -31,7 +30,7 @@
 struct MwmBindingStruct (
   /*- @prop <Name> 作成パラメータ1。ソース名。プロパティオブジェクトまたはコマンドオブジェクトの名前。既定値は`undefined`。 */
   public _CP1_,
-  /*- @prop <RolloutClass|RolloutControl> 作成パラメータ2。ターゲットオブジェクト。既定値は`undefined`。 */
+  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> 作成パラメータ2。ターゲットオブジェクト。既定値は`undefined`。 */
   public _CP2_,
   /*- @prop <Name> 作成パラメータ3。ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
   public _CP3_,
@@ -44,7 +43,7 @@ struct MwmBindingStruct (
   private source,
   /*- @prop <Name> ソース名。プロパティオブジェクトまたはコマンドオブジェクトの名前。既定値は`undefined`。 */
   private sourceName,
-  /*- @prop <RolloutClass|RolloutControl> ターゲットオブジェクト。既定値は`undefined`。 */
+  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> ターゲットオブジェクト。既定値は`undefined`。 */
   private target,
   /*- @prop <Name> ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
   private targetEventName,
@@ -76,10 +75,14 @@ struct MwmBindingStruct (
   public fn TargetChanged type param = (),
 
   private fn isValidCommand obj = (),
-  private fn isValidControl obj = (),
   private fn isValidConverter obj = (),
   private fn isValidEvent obj = (),
+  private fn isValidMenuItem obj = (),
   private fn isValidProperty obj = (),
+  private fn isValidRCMenu obj = (),
+  private fn isValidRollout obj = (),
+  private fn isValidRolloutControl obj = (),
+  private fn isValidTarget obj = (),
   private fn subscribeSource = (),
   private fn unsubscribeSource = (),
   private fn updateTargetEnabled = (),
@@ -129,7 +132,7 @@ struct MwmBindingStruct (
 
   /*-
   ターゲットオブジェクトを取得する。
-  @returns <RolloutClass|RolloutControl|UndefinedClass>
+  @returns <RolloutClass|RolloutControl|RCMenu|MenuItem|UndefinedClass>
   */
   public fn GetTarget = (
     this.target
@@ -141,7 +144,8 @@ struct MwmBindingStruct (
   @remarks ターゲットオブジェクトがロールアウトコントロール以外の場合は`false`を返す。
   */
   public fn GetTargetEnabled = (
-    superClassOf this.target == RolloutControl and this.target.Enabled
+    (this.isValidRolloutControl this.target or this.isValidMenuItem this.target) \
+        and this.target.Enabled
   ),
 
   /*-
@@ -158,8 +162,20 @@ struct MwmBindingStruct (
   */
   public fn GetTargetName = (
     local targetName = undefined
-    if this.isValidControl this.target do (
-      targetName = this.target.Name as Name
+    if this.isValidTarget this.target do (
+      if this.isValidRollout this.target \
+          or this.isValidRolloutControl this.target then (
+        targetName = this.target.Name as Name
+      )
+      else (
+        if this.isValidRCMenu this.target \
+            or this.isValidMenuItem this.target do (
+          local names = filterString (this.target as String) ":"
+          if names.Count == 2 do (
+            targetName = names[2] as Name
+          )
+        )
+      )
     )
     targetName
   ),
@@ -181,7 +197,7 @@ struct MwmBindingStruct (
   public fn GetTargetPropertyValue = (
     local targetPropertyValue = undefined
     if this.isValidProperty this.source \
-        and this.isValidControl this.target \
+        and this.isValidTarget this.target \
         and classOf this.targetPropertyName == Name \
         and isProperty this.target this.targetPropertyName do (
       targetPropertyValue = getProperty this.target this.targetPropertyName
@@ -265,12 +281,12 @@ struct MwmBindingStruct (
 
   /*-
   ターゲットオブジェクトを設定する。
-  @param obj <RolloutClass|RolloutControl>
-  @returns <RolloutClass|RolloutControl>
+  @param obj <RolloutClass|RolloutControl|RCMenu|MenuItem>
+  @returns <RolloutClass|RolloutControl|RCMenu|MenuItem>
   @remarks 無効な値の場合は何もしない。
   */
   public fn SetTarget obj = (
-    if this.isValidControl obj do (
+    if this.isValidTarget obj do (
       this.target = obj
       this.Refresh()
       this.StateChanged.Notify #Target this.target
@@ -286,7 +302,10 @@ struct MwmBindingStruct (
   */
   public fn SetTargetEnabled input = (
     if classOf input == BooleanClass \
-        and superClassOf this.target == RolloutControl do (
+        and (
+          this.isValidRolloutControl this.target \
+              or this.isValidMenuItem this.target
+        ) do (
       this.target.Enabled = input
       this.StateChanged.Notify #TargetEnabledChanged this.target.Enabled
     )
@@ -330,7 +349,7 @@ struct MwmBindingStruct (
   */
   public fn SetTargetPropertyValue input = (
     if this.isValidProperty this.source \
-        and this.isValidControl this.target \
+        and this.isValidTarget this.target \
         and classOf this.targetPropertyName == Name \
         and isProperty this.target this.targetPropertyName do (
       local targetPropertyValue = getProperty this.target this.targetPropertyName
@@ -401,14 +420,6 @@ struct MwmBindingStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
-  private fn isValidControl obj = (
-    classOf obj == RolloutClass or superClassOf obj == RolloutControl
-  ),
-
-  /*-
-  @param obj <Any>
-  @returns <BooleanClass>
-  */
   private fn isValidConverter obj = (
     isStruct obj \
         and isProperty obj #StructName \
@@ -431,11 +442,56 @@ struct MwmBindingStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidMenuItem obj = (
+    classOf obj == Value \
+        and matchPattern (obj as String) pattern:"MenuItem:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidProperty obj = (
     isStruct obj \
         and isProperty obj #StructName \
         and classOf obj.StructName == MAXScriptFunction \
         and obj.StructName() == #MwmPropertyStruct
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRCMenu obj = (
+    (classOf obj as String) as Name == #RCMenu \
+        and matchPattern (obj as String) pattern:"RCMenu:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRollout obj = (
+    classOf obj == RolloutClass
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRolloutControl obj = (
+    superClassOf obj == RolloutControl
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidTarget obj = (
+    this.isValidRollout obj \
+        or this.isValidRolloutControl obj \
+        or this.isValidRCMenu obj \
+        or this.isValidMenuItem obj
   ),
 
   /*-

@@ -158,6 +158,11 @@
     ok
   )
 
+  local MnuTest
+  rcMenu MnuTest (
+    menuItem Mi "Increment"
+  )
+
   local RltTest
   rollout RltTest "RltTest" (
     editText Edt "Count"
@@ -666,6 +671,34 @@
   -- 等しい
   actual = ::TestValueStruct testObj
   expected = ::TestValueStruct (testDef #Increment RltTest.Btn #Pressed)
+  assert (actual.Equals expected == true)
+
+  /* メニューアイテムとのバインディング */
+  testObj = testDef #Increment MnuTest.Mi #Picked
+  testObj.StateChanged.Subscribe testNotification
+  -- GetTarget
+  actual = ::TestValueStruct (testObj.GetTarget())
+  expected = ::TestValueStruct MnuTest.Mi
+  assert (actual.Equals expected == true)
+  -- GetTargetEnabled
+  actual = ::TestValueStruct (testObj.GetTargetEnabled())
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- GetTargetEventName
+  actual = ::TestValueStruct (testObj.GetTargetEventName())
+  expected = ::TestValueStruct #Picked
+  assert (actual.Equals expected == true)
+  -- GetTargetName
+  actual = ::TestValueStruct (testObj.GetTargetName())
+  expected = ::TestValueStruct #Mi
+  assert (actual.Equals expected == true)
+  -- GetTargetPropertyName
+  actual = ::TestValueStruct (testObj.GetTargetPropertyName())
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- GetTargetPropertyValue
+  actual = ::TestValueStruct (testObj.GetTargetPropertyValue())
+  expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()

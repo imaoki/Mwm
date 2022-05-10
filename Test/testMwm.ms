@@ -93,6 +93,11 @@
     input as String
   )
 
+  local MnuTest
+  rcMenu MnuTest (
+    menuItem Mi "Increment"
+  )
+
   local RltTest
   rollout RltTest "RltTest" (
     editText Edt "Count"
@@ -219,10 +224,28 @@
   actual = ::TestValueStruct (testObj.CreateCommandBinding #Increment RltTest.Btn 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功
+  -- 成功（ロールアウト定義）
+  assert (
+    testStructInstance \
+    (testObj.CreateCommandBinding #RolloutOpen RltTest #Open) \
+    #MwmBindingStruct
+  )
+  -- 成功（ロールアウトコントロール）
   assert (
     testStructInstance \
     (testObj.CreateCommandBinding #Increment RltTest.Btn #Pressed) \
+    #MwmBindingStruct
+  )
+  -- 成功（メニュー定義）
+  assert (
+    testStructInstance \
+    (testObj.CreateCommandBinding #MenuOpen MnuTest #Open) \
+    #MwmBindingStruct
+  )
+  -- 成功（メニューアイテム）
+  assert (
+    testStructInstance \
+    (testObj.CreateCommandBinding #Increment MnuTest.Mi #Picked) \
     #MwmBindingStruct
   )
 
@@ -247,10 +270,28 @@
   actual = ::TestValueStruct (testObj.CreateEvent RltTest.Edt 0 "")
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功
+  -- 成功（ロールアウト定義）
+  assert (
+    testStructInstance \
+    (testObj.CreateEvent RltTest #Open "") \
+    #MwmEventStruct
+  )
+  -- 成功（ロールアウトコントロール）
   assert (
     testStructInstance \
     (testObj.CreateEvent RltTest.Edt #Entered "") \
+    #MwmEventStruct
+  )
+  -- 成功（メニュー定義）
+  assert (
+    testStructInstance \
+    (testObj.CreateEvent MnuTest #Open "") \
+    #MwmEventStruct
+  )
+  -- 成功（メニューアイテム）
+  assert (
+    testStructInstance \
+    (testObj.CreateEvent MnuTest.Mi #Picked "") \
     #MwmEventStruct
   )
 
@@ -295,10 +336,28 @@
   actual = ::TestValueStruct (testObj.CreatePropertyBinding #Count RltTest.Edt #Entered 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功
+  -- 成功（ロールアウト定義）
+  assert (
+    testStructInstance \
+    (testObj.CreatePropertyBinding #Count RltTest #Open #Open) \
+    #MwmBindingStruct
+  )
+  -- 成功（ロールアウトコントロール）
   assert (
     testStructInstance \
     (testObj.CreatePropertyBinding #Count RltTest.Edt #Entered #Text) \
+    #MwmBindingStruct
+  )
+  -- 成功（メニュー定義）
+  assert (
+    testStructInstance \
+    (testObj.CreatePropertyBinding #Count MnuTest #Open #Open) \
+    #MwmBindingStruct
+  )
+  -- 成功（メニューアイテム）
+  assert (
+    testStructInstance \
+    (testObj.CreatePropertyBinding #Count MnuTest.Mi #Picked #Checked) \
     #MwmBindingStruct
   )
 

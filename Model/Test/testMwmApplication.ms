@@ -133,6 +133,25 @@
     )
   )
 
+  local MnuTest
+  rcMenu MnuTest (
+    local DataContext = #TestViewModel
+
+    fn IsValidViewModel obj = (
+      isStruct obj \
+          and isProperty obj #StructName \
+          and classOf obj.StructName == MAXScriptFunction \
+          and obj.StructName() == #MwmViewModelStruct
+    )
+
+    fn Initialize obj = (
+      if IsValidViewModel obj do (
+        DataContext = obj
+      )
+      ok
+    )
+  )
+
   local RltTest
   rollout RltTest "RltTest" (
     local DataContext = #TestViewModel
@@ -225,6 +244,7 @@
   local application2 = undefined
   local model = TestModelStruct()
   local view = ::std.DialogStruct RltTest
+  view.SetMenuDef MnuTest
   local viewModel = viewModelDef #TestViewModel
 
   local testConfigFile = pathUtility.ChangeExtension currentFile ".mxsconfig"
@@ -436,6 +456,13 @@
   actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutResized #RltTest)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
+  -- メニューイベントを確認
+  actual = ::TestValueStruct (viewModel.HasCommand #MenuOpen)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (viewModel.HasBindingByName #MenuOpen #RltTest)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
 
   /* GetView */
   actual = ::TestValueStruct (testObj.GetView #RltTest)
@@ -488,6 +515,13 @@
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
   actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutResized #RltTest)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- メニューイベントを確認
+  actual = ::TestValueStruct (viewModel.HasCommand #MenuOpen)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (viewModel.HasBindingByName #MenuOpen #MnuTest)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 

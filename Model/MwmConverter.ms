@@ -1,11 +1,10 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 値の変換機能を提供する構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
-
-```maxscript
-::MwmConverterStruct toTargetFunction toSourceFunction
-```
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmConverterStruct toTargetFunction toSourceFunction
+    ```
 */
 struct MwmConverterStruct (
   /*- @prop <MAXScriptFunction> 作成パラメータ1。値をターゲット用に変換する関数。既定値は`undefined`。 */

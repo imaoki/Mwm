@@ -64,7 +64,11 @@ struct MwmStruct (
 
   private fn isValidControl obj = (),
   private fn isValidConverter obj = (),
+  private fn isValidMenuItem obj = (),
   private fn isValidModelAttribute obj = (),
+  private fn isValidRCMenu obj = (),
+  private fn isValidRollout obj = (),
+  private fn isValidRolloutControl obj = (),
   */
 
   /*-
@@ -308,7 +312,10 @@ struct MwmStruct (
   @returns <BooleanClass>
   */
   private fn isValidControl obj = (
-    classOf obj == RolloutClass or superClassOf obj == RolloutControl
+    this.isValidRollout obj \
+        or this.isValidRolloutControl obj \
+        or this.isValidRCMenu obj \
+        or this.isValidMenuItem obj
   ),
 
   /*-
@@ -326,6 +333,15 @@ struct MwmStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidMenuItem obj = (
+    classOf obj == Value \
+        and matchPattern (obj as String) pattern:"MenuItem:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidModelAttribute obj = (
     isStruct obj \
         and isProperty obj #StructName \
@@ -333,8 +349,33 @@ struct MwmStruct (
         and obj.StructName() == #MwmModelAttributeStruct
   ),
 
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRCMenu obj = (
+    (classOf obj as String) as Name == #RCMenu \
+        and matchPattern (obj as String) pattern:"RCMenu:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRollout obj = (
+    classOf obj == RolloutClass
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRolloutControl obj = (
+    superClassOf obj == RolloutControl
+  ),
+
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "1.1.0",
+  private version = "2.0.0",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,

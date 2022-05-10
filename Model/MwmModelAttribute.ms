@@ -1,11 +1,10 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 モデル属性を格納する構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
-
-```maxscript
-::MwmModelAttributeStruct modelName propertyName getterName setterName
-```
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmModelAttributeStruct modelName propertyName getterName setterName
+    ```
 
 通知
 :   | 通知名            | 通知データ               | タイミング                     |

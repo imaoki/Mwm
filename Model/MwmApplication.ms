@@ -1,15 +1,14 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 アプリケーションをカプセル化するための構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmApplicationStruct applicationName startupViewName applicationFile
+    ```
 
-```maxscript
-::MwmApplicationStruct applicationName startupViewName applicationFile
-```
+    * アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。
 
-* アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。
-
-* 設定ファイルを作りたくない場合はアプリケーションファイルを未定義にする。
+    * 設定ファイルを作りたくない場合はアプリケーションファイルを未定義にする。
 
 通知
 :   | 通知名                 | 通知データ                                        | タイミング                     |
@@ -87,14 +86,20 @@ struct MwmApplicationStruct (
   public fn Shutdown = (),
   public fn WriteConfig = (),
 
+  private fn bindMenuEventToView = (),
   private fn bindRolloutEventToView = (),
+  private fn getMenuViewModel menuDef = (),
+  private fn getRolloutViewModel rolloutDef = (),
   private fn initializeConfig = (),
   private fn isValidConfig obj = (),
   private fn isValidDialog obj = (),
   private fn isValidEvent obj = (),
+  private fn isValidMenuDef obj = (),
   private fn isValidModel obj = (),
+  private fn isValidRolloutDef obj = (),
   private fn isValidView obj = (),
   private fn isValidViewModel obj = (),
+  private fn onMenuOpen model params event = (),
   private fn onRolloutClose model params event = (),
   private fn onRolloutMoved model params event = (),
   private fn onRolloutOpen model params event = (),
@@ -149,6 +154,7 @@ struct MwmApplicationStruct (
     if classOf viewName == Name do (
       this.viewTable[viewName] = obj
       this.bindRolloutEventToView()
+      this.bindMenuEventToView()
       this.StateChanged.Notify #ViewTable this.viewTable
     )
     this.HasView obj
@@ -168,6 +174,7 @@ struct MwmApplicationStruct (
     if classOf viewModelName == Name do (
       this.viewModelTable[viewModelName] = obj
       this.bindRolloutEventToView()
+      this.bindMenuEventToView()
       this.StateChanged.Notify #ViewModelTable this.viewModelTable
     )
     this.HasViewModel obj
@@ -340,20 +347,18 @@ struct MwmApplicationStruct (
         and hasDictValue this.viewTable this.startupViewName do (
       local view = this.viewTable[this.startupViewName]
       if this.isValidView view do (
-        local viewModel = undefined
         local rolloutDef = view.GetRolloutDef()
-        if classOf rolloutDef == RolloutClass do (
-          local dataContext = rolloutDef.DataContext
-          if classOf dataContext == Name then (
-            viewModel = this.GetViewModel dataContext
-          )
-          else (
-            viewModel = dataContext
-          )
-        )
-        if this.isValidViewModel viewModel do (
+        local rolloutViewModel = this.getRolloutViewModel rolloutDef
+        if this.isValidRolloutDef rolloutDef \
+            and this.isValidViewModel rolloutViewModel do (
           if view.Create() do (
-            rolloutDef.Initialize viewModel
+            rolloutDef.Initialize rolloutViewModel
+            local menuDef = view.GetMenuDef()
+            local menuViewModel = this.getMenuViewModel menuDef
+            if this.isValidMenuDef menuDef \
+                and this.isValidViewModel menuViewModel do (
+              menuDef.Initialize menuViewModel
+            )
             this.StateChanged.Notify #ApplicationRan (view.IsDisplayed())
           )
         )
@@ -459,6 +464,33 @@ struct MwmApplicationStruct (
   ),
 
   /*-
+  `RCMenu`のイベントをビューオブジェクトにバインドする。
+  @returns <OkClass>
+  */
+  private fn bindMenuEventToView = (
+    for viewName in this.viewTable.Keys do (
+      local view = this.viewTable[viewName]
+      if this.isValidView view do (
+        local viewName = view.GetRolloutName()
+        local menuDef = view.GetMenuDef()
+        local menuViewModel = this.getMenuViewModel menuDef
+        if classOf viewName == Name \
+            and this.isValidMenuDef menuDef \
+            and this.isValidViewModel menuViewModel do (
+          local commandAttribute = this.modelAttributeDef viewName
+          local openCommand = this.commandDef \
+              #MenuOpen this.onMenuOpen undefined commandAttribute
+          local openBinding = this.bindingDef #MenuOpen menuDef #Open
+          menuViewModel.AddModel viewName view
+          menuViewModel.AddCommand openCommand
+          menuViewModel.SetBinding openBinding
+        )
+      )
+    )
+    ok
+  ),
+
+  /*-
   `RolloutClass`のイベントをビューオブジェクトにバインドする。
   @returns <OkClass>
   */
@@ -466,16 +498,12 @@ struct MwmApplicationStruct (
     for viewName in this.viewTable.Keys do (
       local view = this.viewTable[viewName]
       if this.isValidView view do (
-        local viewModel = undefined
-        local rolloutDef = view.GetRolloutDef()
-        if classOf rolloutDef == RolloutClass do (
-          local dataContext = rolloutDef.DataContext
-          if classOf dataContext == Name do (
-            viewModel = this.GetViewModel dataContext
-          )
-        )
         local viewName = view.GetRolloutName()
-        if classOf viewName == Name and this.isValidViewModel viewModel do (
+        local rolloutDef = view.GetRolloutDef()
+        local rolloutViewModel = this.getRolloutViewModel rolloutDef
+        if classOf viewName == Name \
+            and this.isValidRolloutDef rolloutDef \
+            and this.isValidViewModel rolloutViewModel do (
           local commandAttribute = this.modelAttributeDef viewName
           local closeCommand = this.commandDef \
               #RolloutClose this.onRolloutClose undefined commandAttribute
@@ -491,19 +519,55 @@ struct MwmApplicationStruct (
           local openBinding = this.bindingDef #RolloutOpen rolloutDef #Open
           local resizedBinding = this.bindingDef #RolloutResized rolloutDef #Resized
 
-          viewModel.AddModel viewName view
-          viewModel.AddCommand closeCommand
-          viewModel.AddCommand movedCommand
-          viewModel.AddCommand openCommand
-          viewModel.AddCommand resizedCommand
-          viewModel.SetBinding closeBinding
-          viewModel.SetBinding movedBinding
-          viewModel.SetBinding openBinding
-          viewModel.SetBinding resizedBinding
+          rolloutViewModel.AddModel viewName view
+          rolloutViewModel.AddCommand closeCommand
+          rolloutViewModel.AddCommand movedCommand
+          rolloutViewModel.AddCommand openCommand
+          rolloutViewModel.AddCommand resizedCommand
+          rolloutViewModel.SetBinding closeBinding
+          rolloutViewModel.SetBinding movedBinding
+          rolloutViewModel.SetBinding openBinding
+          rolloutViewModel.SetBinding resizedBinding
         )
       )
     )
     ok
+  ),
+
+  /*-
+  @param menuDef <RCMenu|UndefinedClass>
+  @returns <Struct:MwmViewModelStruct|UndefinedClass>
+  */
+  private fn getMenuViewModel menuDef = (
+    local viewModel = undefined
+    if this.isValidMenuDef menuDef do (
+      local dataContext = menuDef.DataContext
+      if classOf dataContext == Name then (
+        viewModel = this.GetViewModel dataContext
+      )
+      else (
+        viewModel = dataContext
+      )
+    )
+    viewModel
+  ),
+
+  /*-
+  @param rolloutDef <RolloutClass|UndefinedClass>
+  @returns <Struct:MwmViewModelStruct|UndefinedClass>
+  */
+  private fn getRolloutViewModel rolloutDef = (
+    local viewModel = undefined
+    if this.isValidRolloutDef rolloutDef do (
+      local dataContext = rolloutDef.DataContext
+      if classOf dataContext == Name then (
+        viewModel = this.GetViewModel dataContext
+      )
+      else (
+        viewModel = dataContext
+      )
+    )
+    viewModel
   ),
 
   /*-
@@ -557,6 +621,21 @@ struct MwmApplicationStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidMenuDef obj = (
+    (classOf obj as String) as Name == #RCMenu \
+        and isProperty obj #DataContext \
+        and (
+          classOf obj.DataContext == Name \
+              or this.isValidViewModel obj.DataContext
+        ) \
+        and isProperty obj #Initialize \
+        and classOf obj.Initialize == MAXScriptFunction
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidModel obj = (
     isStruct obj
   ),
@@ -565,20 +644,23 @@ struct MwmApplicationStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidRolloutDef obj = (
+    classOf obj == RolloutClass \
+        and isProperty obj #DataContext \
+        and (
+          classOf obj.DataContext == Name \
+              or this.isValidViewModel obj.DataContext
+        ) \
+        and isProperty obj #Initialize \
+        and classOf obj.Initialize == MAXScriptFunction
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidView obj = (
-    local isValid = this.isValidDialog obj
-    if isValid do (
-      local rolloutDef = obj.GetRolloutDef()
-      isValid = classOf rolloutDef == RolloutClass \
-          and isProperty rolloutDef #DataContext \
-          and isProperty rolloutDef #Initialize \
-          and classOf rolloutDef.Initialize == MAXScriptFunction
-    )
-    if isValid do (
-      isValid = classOf rolloutDef.DataContext == Name \
-          or this.isValidViewModel rolloutDef.DataContext
-    )
-    isValid
+    this.isValidDialog obj and this.isValidRolloutDef (obj.GetRolloutDef())
   ),
 
   /*-
@@ -590,6 +672,23 @@ struct MwmApplicationStruct (
         and isProperty obj #StructName \
         and classOf obj.StructName == MAXScriptFunction \
         and obj.StructName() == #MwmViewModelStruct
+  ),
+
+  /*-
+  `RCMenu`の`Open`イベントに対応したコマンド用関数。
+  @param model <Struct:DialogStruct>
+  @param params <Array[<DataPair Name:<Name> Value:<Any>>]>
+  @param event <Struct:MwmEventStruct|UndefinedClass>
+  @returns <OkClass>
+  */
+  private fn onMenuOpen model params event = (
+    for viewModelName in this.viewModelTable.Keys do (
+      local viewModel = this.viewModelTable[viewModelName]
+      if this.isValidViewModel viewModel do (
+        viewModel.RefreshBinding()
+      )
+    )
+    ok
   ),
 
   /*-

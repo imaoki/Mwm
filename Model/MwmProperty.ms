@@ -2,11 +2,11 @@
 /*-
 ビューモデルにプロパティを定義するための構造体。
 @remarks モデル属性が未定義の場合は設定オブジェクトに値が保存される。
-インスタンス作成時のパラメータ指定順は以下の通り。
 
-```maxscript
-::MwmPropertyStruct propertyName propertyValue [modelAttribute]
-```
+作成パラメータ
+:   ```maxscript
+    ::MwmPropertyStruct propertyName propertyValue [modelAttribute]
+    ```
 
 通知
 :   | 通知名            | 通知データ               | タイミング                   |

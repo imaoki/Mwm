@@ -1,21 +1,20 @@
 /*! © 2022 imaoki | MIT License | https://github.com/imaoki */
 /*-
 ロールアウトコントロールのイベント情報を格納する構造体。
-@remarks インスタンス作成時のパラメータ指定順は以下の通り。
-
-```maxscript
-::MwmEventStruct control eventName params
-```
+@remarks 作成パラメータ
+:   ```maxscript
+    ::MwmEventStruct control eventName params
+    ```
 */
 struct MwmEventStruct (
-  /*- @prop <RolloutClass|RolloutControl> 作成パラメータ1。イベント発生元のロールアウトコントロール。既定値は`undefined`。 */
+  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> 作成パラメータ1。イベント発生元のロールアウトコントロール。既定値は`undefined`。 */
   public _CP1_,
   /*- @prop <Name> 作成パラメータ2。イベント名。既定値は`undefined`。 */
   public _CP2_,
   /*- @prop <Array[<Any>]|Any> 作成パラメータ3。イベントデータ。既定値は`#()`。 */
   public _CP3_ = #(),
 
-  /*- @prop <RolloutClass|RolloutControl> イベント発生元のロールアウトコントロール。既定値は`undefined`。 */
+  /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> イベント発生元のロールアウトコントロール。既定値は`undefined`。 */
   private control,
   /*- @prop <Name> イベント名。既定値は`undefined`。 */
   private eventName,
@@ -29,11 +28,17 @@ struct MwmEventStruct (
   public fn SetControl input = (),
   public fn SetEventName input = (),
   public fn SetParams input = (),
+
+  private fn isValidControl obj = (),
+  private fn isValidMenuItem obj = (),
+  private fn isValidRCMenu obj = (),
+  private fn isValidRollout obj = (),
+  private fn isValidRolloutControl obj = (),
   */
 
   /*-
   イベント発生元のロールアウトコントロールを取得する。
-  @returns <RolloutClass|RolloutControl|UndefinedClass>
+  @returns <RolloutClass|RolloutControl|RCMenu|MenuItem|UndefinedClass>
   */
   public fn GetControl = (
     this.control
@@ -57,12 +62,12 @@ struct MwmEventStruct (
 
   /*-
   イベント発生元のロールアウトコントロールを設定する。
-  @param input <RolloutClass|RolloutControl>
-  @returns <RolloutClass|RolloutControl>
+  @param input <RolloutClass|RolloutControl|RCMenu|MenuItem>
+  @returns <RolloutClass|RolloutControl|RCMenu|MenuItem|UndefinedClass>
   @remarks 無効な値の場合は何もしない。
   */
   public fn SetControl input = (
-    if classOf input == RolloutClass or superClassOf input == RolloutControl do (
+    if this.isValidControl input do (
       this.control = input
     )
     this.GetControl()
@@ -95,6 +100,51 @@ struct MwmEventStruct (
       this.params = #(input)
     )
     this.GetParams()
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidControl obj = (
+    this.isValidRollout obj \
+        or this.isValidRolloutControl obj \
+        or this.isValidRCMenu obj \
+        or this.isValidMenuItem obj
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidMenuItem obj = (
+    classOf obj == Value \
+        and matchPattern (obj as String) pattern:"MenuItem:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRCMenu obj = (
+    (classOf obj as String) as Name == #RCMenu \
+        and matchPattern (obj as String) pattern:"RCMenu:*" ignoreCase:true
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRollout obj = (
+    classOf obj == RolloutClass
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
+  private fn isValidRolloutControl obj = (
+    superClassOf obj == RolloutControl
   ),
 
   /*- @returns <Name> */
