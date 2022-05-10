@@ -10,14 +10,14 @@
   local generalConverterCode = mp.ClipFile @".\generalConverter.ms" 64 -1
   local MwmCode = mp.ClipFile @".\Mwm.ms" 1 -1
 
-  local MwmApplicationCode = mp.ClipFile @".\Model\MwmApplication.ms" 1828 -1
-  local MwmBindingCode = mp.ClipFile @".\Model\MwmBinding.ms" 2011 -1
-  local MwmCommandCode = mp.ClipFile @".\Model\MwmCommand.ms" 1629 -1
-  local MwmConverterCode = mp.ClipFile @".\Model\MwmConverter.ms" 195 -1
-  local MwmEventCode = mp.ClipFile @".\Model\MwmEvent.ms" 195 -1
-  local MwmModelAttributeCode = mp.ClipFile @".\Model\MwmModelAttribute.ms" 754 -1
-  local MwmPropertyCode = mp.ClipFile @".\Model\MwmProperty.ms" 894 -1
-  local MwmViewModelCode = mp.ClipFile @".\Model\MwmViewModel.ms" 917 -1
+  local MwmApplicationCode = mp.ClipFile @".\Model\MwmApplication.ms" 1829 -1
+  local MwmBindingCode = mp.ClipFile @".\Model\MwmBinding.ms" 2004 -1
+  local MwmCommandCode = mp.ClipFile @".\Model\MwmCommand.ms" 1622 -1
+  local MwmConverterCode = mp.ClipFile @".\Model\MwmConverter.ms" 188 -1
+  local MwmEventCode = mp.ClipFile @".\Model\MwmEvent.ms" 188 -1
+  local MwmModelAttributeCode = mp.ClipFile @".\Model\MwmModelAttribute.ms" 741 -1
+  local MwmPropertyCode = mp.ClipFile @".\Model\MwmProperty.ms" 919 -1
+  local MwmViewModelCode = mp.ClipFile @".\Model\MwmViewModel.ms" 910 -1
 
   /* コード置換 */
   local definitionPoolMergedCode = mp.ReplaceText definitionPoolCode 793 33 MwmApplicationCode
@@ -29,7 +29,7 @@
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 243 29 MwmCommandCode
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 167 29 MwmBindingCode
   definitionPoolMergedCode = mp.ClipText definitionPoolMergedCode 64 -1
-  local code = mp.ReplaceText MwmCode 9310 29 generalConverterCode
+  local code = mp.ReplaceText MwmCode 9451 29 generalConverterCode
   code = mp.ReplaceText code 714 27 definitionPoolMergedCode
 
   /* インストールコード追加 */
