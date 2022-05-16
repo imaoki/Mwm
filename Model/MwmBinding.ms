@@ -534,7 +534,7 @@ struct MwmBindingStruct (
   ),
 
   /*-
-  ソースオブジェクトの通知を購読する。
+  ソースオブジェクトを購読する。
   @returns <OkClass>
   */
   private fn subscribeSource = (
@@ -549,7 +549,7 @@ struct MwmBindingStruct (
   ),
 
   /*-
-  ソースオブジェクトの通知の購読を解除する。
+  ソースオブジェクトの購読を解除する。
   @returns <OkClass>
   */
   private fn unsubscribeSource = (

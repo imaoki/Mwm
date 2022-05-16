@@ -316,7 +316,7 @@ struct MwmPropertyStruct (
   ),
 
   /*-
-  モデルのプロパティ通知を購読する。
+  モデルを購読する。
   @returns <OkClass>
   */
   private fn subscribeModel = (
@@ -341,7 +341,7 @@ struct MwmPropertyStruct (
   ),
 
   /*-
-  モデルのプロパティ通知の購読を解除する。
+  モデルの購読を解除する。
   @returns <OkClass>
   */
   private fn unsubscribeModel = (
