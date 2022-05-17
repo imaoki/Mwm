@@ -18,9 +18,9 @@
     | `#ModelAttribute`      | 新たな`modelAttribute`値      | `modelAttribute`を設定した後                   |
 
 オブザーバ
-:   | 購読先                                            | メソッド                 |
-    | ------------------------------------------------- | ------------------------ |
-    | `canExecuteCondition`に設定した条件オブジェクト。 | `RaiseCanExecuteChanged` |
+:   | 購読先                                          | メソッド                 |
+    | ----------------------------------------------- | ------------------------ |
+    | `canExecuteCondition`に設定した条件オブジェクト | `RaiseCanExecuteChanged` |
 */
 struct MwmCommandStruct (
   /*- @prop <Name> 作成パラメータ1。コマンド名。既定値は`undefined`。 */
