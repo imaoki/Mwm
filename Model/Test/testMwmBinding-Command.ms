@@ -17,6 +17,7 @@
   /* Setup Start ------------------------------------------------------------ */
   fileIn (pathUtility.GetFullPath @"..\..\definitionPool.ms")
   local commandDef = ::mwmDefinitionPool[@"Model\MwmCommand.ms"]
+  local conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
   local converterDef = ::mwmDefinitionPool[@"Model\MwmConverter.ms"]
   local eventDef = ::mwmDefinitionPool[@"Model\MwmEvent.ms"]
   local modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]
@@ -137,27 +138,6 @@
     )
   )
 
-  local testToSourceFunction
-  fn testToSourceFunction input = (
-    input as Integer
-  )
-
-  local testToTargetFunction
-  fn testToTargetFunction input = (
-    input as String
-  )
-
-  local testCanExecuteFunction
-  fn testCanExecuteFunction params = (
-    params[1].Value != 0
-  )
-
-  local testExecuteFunction
-  fn testExecuteFunction model params event = (
-    model.Increment params[1].Value
-    ok
-  )
-
   local MnuTest
   rcMenu MnuTest (
     menuItem Mi "Increment"
@@ -239,6 +219,27 @@
     ok
   )
 
+  local testToSourceFunction
+  fn testToSourceFunction input = (
+    input as Integer
+  )
+
+  local testToTargetFunction
+  fn testToTargetFunction input = (
+    input as String
+  )
+
+  local testCanExecuteFunction
+  fn testCanExecuteFunction params = (
+    params[1].Value != 0
+  )
+
+  local testExecuteFunction
+  fn testExecuteFunction model params event = (
+    model.Increment params[1].Value
+    ok
+  )
+
   local converter = converterDef testToTargetFunction testToSourceFunction
   local model = TestModelStruct()
   local modelAttribute = modelAttributeDef #TestModel
@@ -250,11 +251,13 @@
   local stepProperty = propertyDef #Step 1 stepAttribute
   stepProperty.SetModel model
 
+  local canExecuteCondition = conditionDef testCanExecuteFunction
+  canExecuteCondition.AddProperty stepProperty
+  local executeCondition = conditionDef()
+  executeCondition.AddProperty stepProperty
   local incrementCommand = commandDef #Increment \
-      testExecuteFunction testCanExecuteFunction modelAttribute
+      testExecuteFunction executeCondition canExecuteCondition modelAttribute
   incrementCommand.SetModel model
-  incrementCommand.AddCanExecuteProperty stepProperty
-  incrementCommand.AddExecuteProperty stepProperty
 
   createDialog RltTest 160 160 \
       style:#(

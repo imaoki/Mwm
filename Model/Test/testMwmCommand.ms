@@ -16,6 +16,7 @@
   format "[run %]@\"%\"\n" nowTime currentFile
   /* Setup Start ------------------------------------------------------------ */
   fileIn (pathUtility.GetFullPath @"..\..\definitionPool.ms")
+  local conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
   local eventDef = ::mwmDefinitionPool[@"Model\MwmEvent.ms"]
   local modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]
   local propertyDef = ::mwmDefinitionPool[@"Model\MwmProperty.ms"]
@@ -145,6 +146,70 @@
     )
   )
 
+  local expectedCanExecute = true
+  local expectedCanExecuteCondition = undefined
+  local expectedCommandName = undefined
+  local expectedExecuteCondition = undefined
+  local expectedExecuteFunction = undefined
+  local expectedModel = undefined
+  local expectedModelAttribute = undefined
+  local expectedPostProcessFunction = undefined
+  local expectedPreProcessFunction = undefined
+
+  local testNotification
+  fn testNotification type param = (
+    -- format "testNotification type:% param:%\n" type param
+    case type of (
+      (#CanExecuteChanged): (
+        actual = ::TestValueStruct (testObj.CanExecute())
+        expected = ::TestValueStruct expectedCanExecute
+        assert (actual.Equals expected == true)
+      )
+      (#CanExecuteCondition): (
+        actual = ::TestValueStruct (testObj.GetCanExecuteCondition())
+        expected = ::TestValueStruct expectedCanExecuteCondition
+        assert (actual.Equals expected == true)
+      )
+      (#CommandName): (
+        actual = ::TestValueStruct (testObj.GetCommandName())
+        expected = ::TestValueStruct expectedCommandName
+        assert (actual.Equals expected == true)
+      )
+      (#ExecuteCondition): (
+        actual = ::TestValueStruct (testObj.GetExecuteCondition())
+        expected = ::TestValueStruct expectedExecuteCondition
+        assert (actual.Equals expected == true)
+      )
+      (#ExecuteFunction): (
+        actual = ::TestValueStruct (testObj.GetExecuteFunction())
+        expected = ::TestValueStruct expectedExecuteFunction
+        assert (actual.Equals expected == true)
+      )
+      (#Model): (
+        actual = ::TestValueStruct (testObj.GetModel())
+        expected = ::TestValueStruct expectedModel
+        assert (actual.Equals expected == true)
+      )
+      (#ModelAttribute): (
+        actual = ::TestValueStruct (testObj.GetModelAttribute())
+        expected = ::TestValueStruct expectedModelAttribute
+        assert (actual.Equals expected == true)
+      )
+      (#PostProcessFunction): (
+        actual = ::TestValueStruct (testObj.GetPostProcessFunction())
+        expected = ::TestValueStruct expectedPostProcessFunction
+        assert (actual.Equals expected == true)
+      )
+      (#PreProcessFunction): (
+        actual = ::TestValueStruct (testObj.GetPreProcessFunction())
+        expected = ::TestValueStruct expectedPreProcessFunction
+        assert (actual.Equals expected == true)
+      )
+      default: ()
+    )
+    ok
+  )
+
   local testCanExecuteFunction
   fn testCanExecuteFunction params = (
     params.Count == 2 \
@@ -174,83 +239,20 @@
     ok
   )
 
-  local expectedCanExecute = true
-  local expectedCanExecuteFunction = undefined
-  local expectedCanExecuteProperties = #()
-  local expectedCommandName = undefined
-  local expectedExecuteFunction = undefined
-  local expectedExecuteProperties = #()
-  local expectedModel = undefined
-  local expectedModelAttribute = undefined
-  local expectedPostProcessFunction = undefined
-  local expectedPreProcessFunction = undefined
-
-  local testNotification
-  fn testNotification type param = (
-    -- format "testNotification type:% param:%\n" type param
-    case type of (
-      (#CanExecuteChanged): (
-        actual = ::TestValueStruct (testObj.CanExecute())
-        expected = ::TestValueStruct expectedCanExecute
-        assert (actual.Equals expected == true)
-      )
-      (#CanExecuteFunction): (
-        actual = ::TestValueStruct (testObj.GetCanExecuteFunction())
-        expected = ::TestValueStruct expectedCanExecuteFunction
-        assert (actual.Equals expected == true)
-      )
-      (#CanExecuteProperties): (
-        actual = ::TestValueStruct (testObj.GetCanExecuteProperties())
-        expected = ::TestValueStruct expectedCanExecuteProperties
-        assert (actual.Equals expected == true)
-      )
-      (#CommandName): (
-        actual = ::TestValueStruct (testObj.GetCommandName())
-        expected = ::TestValueStruct expectedCommandName
-        assert (actual.Equals expected == true)
-      )
-      (#ExecuteFunction): (
-        actual = ::TestValueStruct (testObj.GetExecuteFunction())
-        expected = ::TestValueStruct expectedExecuteFunction
-        assert (actual.Equals expected == true)
-      )
-      (#ExecuteProperties): (
-        actual = ::TestValueStruct (testObj.GetExecuteProperties())
-        expected = ::TestValueStruct expectedExecuteProperties
-        assert (actual.Equals expected == true)
-      )
-      (#Model): (
-        actual = ::TestValueStruct (testObj.GetModel())
-        expected = ::TestValueStruct expectedModel
-        assert (actual.Equals expected == true)
-      )
-      (#ModelAttribute): (
-        actual = ::TestValueStruct (testObj.GetModelAttribute())
-        expected = ::TestValueStruct expectedModelAttribute
-        assert (actual.Equals expected == true)
-      )
-      (#PostProcessFunction): (
-        actual = ::TestValueStruct (testObj.GetPostProcessFunction())
-        expected = ::TestValueStruct expectedPostProcessFunction
-        assert (actual.Equals expected == true)
-      )
-      (#PreProcessFunction): (
-        actual = ::TestValueStruct (testObj.GetPreProcessFunction())
-        expected = ::TestValueStruct expectedPreProcessFunction
-        assert (actual.Equals expected == true)
-      )
-      default: ()
-    )
-    ok
-  )
-
   local model = TestModelStruct()
   local modelAttribute = modelAttributeDef #TestModel
   local firstNameAttribute = modelAttributeDef #TestModel #FirstName #GetFirstName #SetFirstName
   local lastNameAttribute = modelAttributeDef #TestModel #LastName #GetLastName #SetLastName
   local firstNameProperty = propertyDef #FirstName "" firstNameAttribute
   local lastNameProperty = propertyDef #LastName "" lastNameAttribute
-  local command2 = undefined
+
+  local dummyCanExecuteCondition = conditionDef()
+  local canExecuteCondition = conditionDef testCanExecuteFunction
+  canExecuteCondition.AddProperty firstNameProperty
+  canExecuteCondition.AddProperty lastNameProperty
+  local executeCondition = conditionDef()
+  executeCondition.AddProperty firstNameProperty
+  executeCondition.AddProperty lastNameProperty
 
   testDef = ::mwmDefinitionPool[@"Model\MwmCommand.ms"]
   /* Setup End -------------------------------------------------------------- */
@@ -272,32 +274,10 @@
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
 
-  /* GetCanExecuteFunction */
+  /* GetCanExecuteCondition */
   -- 既定値
-  actual = ::TestValueStruct (testObj.GetCanExecuteFunction())
+  actual = ::TestValueStruct (testObj.GetCanExecuteCondition())
   expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetCanExecuteProperties */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetCanExecuteProperties())
-  expected = ::TestValueStruct #()
-  assert (actual.Equals expected == true)
-
-  /* GetCanExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.GetCanExecuteProperty 0)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetCanExecuteProperty #Foo)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetCanExecutePropertyNames */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetCanExecutePropertyNames())
-  expected = ::TestValueStruct #()
   assert (actual.Equals expected == true)
 
   /* GetCommandName */
@@ -306,32 +286,16 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
+  /* GetExecuteCondition */
+  -- 既定値
+  actual = ::TestValueStruct (testObj.GetExecuteCondition())
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+
   /* GetExecuteFunction */
   -- 既定値
   actual = ::TestValueStruct (testObj.GetExecuteFunction())
   expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetExecuteProperties */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetExecuteProperties())
-  expected = ::TestValueStruct #()
-  assert (actual.Equals expected == true)
-
-  /* GetExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.GetExecuteProperty 0)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetExecuteProperty #Foo)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetExecutePropertyNames */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetExecutePropertyNames())
-  expected = ::TestValueStruct #()
   assert (actual.Equals expected == true)
 
   /* GetModel */
@@ -358,145 +322,39 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
-  /* HasCanExecuteProperty */
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty #FirstName)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-
-  /* HasExecuteProperty */
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasExecuteProperty #FirstName)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-
-  /* AddCanExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.AddCanExecuteProperty 0)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedCanExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddCanExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 通知元の購読を確認（成功）
-  actual = ::TestValueStruct (firstNameProperty.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 重複登録（成功するが既に存在するので何もしない）
-  expectedCanExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddCanExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedCanExecuteProperties = #(
-    firstNameProperty,
-    lastNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddCanExecuteProperty lastNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 通知元の購読を確認（成功）
-  actual = ::TestValueStruct (lastNameProperty.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
-  /* AddExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.AddExecuteProperty 0)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 重複登録（成功するが既に存在するので何もしない）
-  expectedExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedExecuteProperties = #(
-    firstNameProperty,
-    lastNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddExecuteProperty lastNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
-  /* HasCanExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty 0)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty lastNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty #FirstName)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (testObj.HasCanExecuteProperty #LastName)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
-  /* HasExecuteProperty */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.HasExecuteProperty 0)
-  expected = ::TestValueStruct false
-  assert (actual.Equals expected == true)
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (testObj.HasExecuteProperty lastNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasExecuteProperty #FirstName)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (testObj.HasExecuteProperty #LastName)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
   /* RaiseCanExecuteChanged */
+  -- コマンドが実行可能かどうかを判定する条件オブジェクトが未定義なので失敗
   expectedCanExecute = true
   actual = ::TestValueStruct (testObj.RaiseCanExecuteChanged #PropertyValue 0)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
 
-  /* SetCanExecuteFunction */
+  /* SetCanExecuteCondition */
   -- 無効な値
-  actual = ::TestValueStruct (testObj.SetCanExecuteFunction 0)
+  actual = ::TestValueStruct (testObj.SetCanExecuteCondition 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 成功
-  expectedCanExecuteFunction = testCanExecuteFunction
-  actual = ::TestValueStruct (testObj.SetCanExecuteFunction testCanExecuteFunction)
-  expected = ::TestValueStruct expectedCanExecuteFunction
+  expectedCanExecuteCondition = dummyCanExecuteCondition
+  actual = ::TestValueStruct (testObj.SetCanExecuteCondition dummyCanExecuteCondition)
+  expected = ::TestValueStruct expectedCanExecuteCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (dummyCanExecuteCondition.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 成功
+  expectedCanExecuteCondition = canExecuteCondition
+  actual = ::TestValueStruct (testObj.SetCanExecuteCondition canExecuteCondition)
+  expected = ::TestValueStruct expectedCanExecuteCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (canExecuteCondition.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 通知元の購読解除を確認（dummyCanExecuteCondition）
+  actual = ::TestValueStruct (dummyCanExecuteCondition.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
+  expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   /* SetCommandName */
@@ -508,6 +366,21 @@
   expectedCommandName = #Submit
   actual = ::TestValueStruct (testObj.SetCommandName #Submit)
   expected = ::TestValueStruct expectedCommandName
+  assert (actual.Equals expected == true)
+
+  /* SetExecuteCondition */
+  -- 無効な値
+  actual = ::TestValueStruct (testObj.SetExecuteCondition 0)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 成功
+  expectedExecuteCondition = executeCondition
+  actual = ::TestValueStruct (testObj.SetExecuteCondition executeCondition)
+  expected = ::TestValueStruct expectedExecuteCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (executeCondition.StateChanged.HasSubscribed testObj.RaiseCanExecuteChanged)
+  expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   /* SetExecuteFunction */
@@ -588,12 +461,20 @@
   -- testObj.Dump()
 
   /* 作成パラメータ */
-  testObj = testDef #Submit testExecuteFunction testCanExecuteFunction modelAttribute
+  testObj = testDef #Submit testExecuteFunction executeCondition canExecuteCondition modelAttribute
   testObj.CanExecuteChanged.Subscribe testNotification
   testObj.StateChanged.Subscribe testNotification
-  -- GetCanExecuteFunction
-  actual = ::TestValueStruct (testObj.GetCanExecuteFunction())
-  expected = ::TestValueStruct testCanExecuteFunction
+  -- GetCommandName
+  actual = ::TestValueStruct (testObj.GetCommandName())
+  expected = ::TestValueStruct #Submit
+  assert (actual.Equals expected == true)
+  -- GetCanExecuteCondition
+  actual = ::TestValueStruct (testObj.GetCanExecuteCondition())
+  expected = ::TestValueStruct canExecuteCondition
+  assert (actual.Equals expected == true)
+  -- GetExecuteCondition
+  actual = ::TestValueStruct (testObj.GetExecuteCondition())
+  expected = ::TestValueStruct executeCondition
   assert (actual.Equals expected == true)
   -- GetExecuteFunction
   actual = ::TestValueStruct (testObj.GetExecuteFunction())
@@ -604,43 +485,16 @@
   expected = ::TestValueStruct modelAttribute
   assert (actual.Equals expected == true)
 
-  /* SetModel */
-  -- 成功
-  expectedModel = model
-  actual = ::TestValueStruct (testObj.SetModel model)
-  expected = ::TestValueStruct expectedModel
-  assert (actual.Equals expected == true)
-
-  /* AddCanExecuteProperty */
-  -- 成功
-  expectedCanExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddCanExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
-  /* AddExecuteProperty */
-  -- 成功
-  expectedExecuteProperties = #(
-    firstNameProperty
-  )
-  actual = ::TestValueStruct (testObj.AddExecuteProperty firstNameProperty)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-
   /* Equals */
   -- 等しくない
   actual = ::TestValueStruct testObj
   expected = ::TestValueStruct (testDef())
   assert (actual.Equals expected == false)
   -- 等しい
-  command2 = testDef #Submit testExecuteFunction testCanExecuteFunction modelAttribute
-  command2.SetModel model
-  command2.AddCanExecuteProperty firstNameProperty
-  command2.AddExecuteProperty firstNameProperty
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct command2
+  expected = ::TestValueStruct (
+    testDef #Submit testExecuteFunction executeCondition canExecuteCondition modelAttribute
+  )
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()

@@ -16,6 +16,7 @@
   format "[run %]@\"%\"\n" nowTime currentFile
   /* Setup Start ------------------------------------------------------------ */
   fileIn (pathUtility.GetFullPath @"..\..\definitionPool.ms")
+  local conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
   local converterDef = ::mwmDefinitionPool[@"Model\MwmConverter.ms"]
   local eventDef = ::mwmDefinitionPool[@"Model\MwmEvent.ms"]
   local modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]
@@ -136,27 +137,6 @@
     )
   )
 
-  local testToSourceFunction
-  fn testToSourceFunction input = (
-    input as Integer
-  )
-
-  local testToTargetFunction
-  fn testToTargetFunction input = (
-    input as String
-  )
-
-  local testCanExecuteFunction
-  fn testCanExecuteFunction params = (
-    params[1].Value != 0
-  )
-
-  local testExecuteFunction
-  fn testExecuteFunction model params = (
-    model.Increment params[1].Value
-    ok
-  )
-
   local RltTest
   rollout RltTest "RltTest" (
     editText Edt "Count"
@@ -230,6 +210,27 @@
       )
       default: ()
     )
+    ok
+  )
+
+  local testToSourceFunction
+  fn testToSourceFunction input = (
+    input as Integer
+  )
+
+  local testToTargetFunction
+  fn testToTargetFunction input = (
+    input as String
+  )
+
+  local testCanExecuteFunction
+  fn testCanExecuteFunction params = (
+    params[1].Value != 0
+  )
+
+  local testExecuteFunction
+  fn testExecuteFunction model params = (
+    model.Increment params[1].Value
     ok
   )
 

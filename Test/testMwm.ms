@@ -83,6 +83,17 @@
     on Create do ()
   )
 
+  local MnuTest
+  rcMenu MnuTest (
+    menuItem Mi "Increment"
+  )
+
+  local RltTest
+  rollout RltTest "RltTest" (
+    editText Edt "Count"
+    button Btn "Increment"
+  )
+
   local testToSourceFunction
   fn testToSourceFunction input = (
     input as Integer
@@ -93,15 +104,9 @@
     input as String
   )
 
-  local MnuTest
-  rcMenu MnuTest (
-    menuItem Mi "Increment"
-  )
-
-  local RltTest
-  rollout RltTest "RltTest" (
-    editText Edt "Count"
-    button Btn "Increment"
+  local testEvaluator
+  fn testEvaluator params = (
+    ok
   )
 
   local testStructInstance
@@ -247,6 +252,14 @@
     testStructInstance \
     (testObj.CreateCommandBinding #Increment MnuTest.Mi #Picked) \
     #MwmBindingStruct
+  )
+
+  /* CreateCondition */
+  -- 成功
+  assert (
+    testStructInstance \
+    (testObj.CreateCondition evaluator:testEvaluator) \
+    #MwmConditionStruct
   )
 
   /* CreateConverter */

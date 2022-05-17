@@ -34,6 +34,8 @@ struct MwmStruct (
   private bindingDef,
   /*- @prop <StructDef:MwmCommandStruct> */
   private commandDef,
+  /*- @prop <StructDef:MwmConditionStruct> */
+  private conditionDef,
   /*- @prop <StructDef:MwmConverterStruct> */
   private converterDef,
   /*- @prop <StructDef:MwmEventStruct> */
@@ -48,8 +50,9 @@ struct MwmStruct (
   /*
   public fn AddConverter converterName converter = (),
   public fn CreateApplication applicationName startupViewName applicationFile:undefined = (),
-  public fn CreateCommand commandName executeFunction:undefined canExecuteFunction:undefined modelAttribute:undefined = (),
+  public fn CreateCommand commandName executeFunction:undefined executeCondition:undefined canExecuteCondition:undefined modelAttribute:undefined = (),
   public fn CreateCommandBinding commandName target targetEventName = (),
+  public fn CreateCondition evaluator:undefined = (),
   public fn CreateConverter toTargetFunction toSourceFunction = (),
   public fn CreateEvent control eventName params = (),
   public fn CreateModelAttribute modelName propertyName:undefined getterName:undefined setterName:undefined = (),
@@ -112,15 +115,16 @@ struct MwmStruct (
   コマンドを作成する。
   @param commandName <Name> コマンド名。
   @param executeFunction: <MAXScriptFunction|UndefinedClass> コマンドの内容を定義した関数。既定値は`undefined`。
-  @param canExecuteFunction: <MAXScriptFunction|UndefinedClass> コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。
+  @param executeCondition: <Struct:MwmConditionStruct|UndefinedClass> コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。
+  @param canExecuteCondition: <Struct:MwmConditionStruct|UndefinedClass> コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。
   @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
   @returns <Struct:MwmCommandStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
-  public fn CreateCommand commandName executeFunction:undefined canExecuteFunction:undefined modelAttribute:undefined = (
+  public fn CreateCommand commandName executeFunction:undefined executeCondition:undefined canExecuteCondition:undefined modelAttribute:undefined = (
     local command = undefined
     if classOf commandName == Name do (
-      command = this.commandDef commandName executeFunction canExecuteFunction modelAttribute
+      command = this.commandDef commandName executeFunction executeCondition canExecuteCondition modelAttribute
     )
     command
   ),
@@ -141,6 +145,15 @@ struct MwmStruct (
       binding = this.bindingDef 1 commandName target targetEventName
     )
     binding
+  ),
+
+  /*-
+  条件オブジェクトを作成する。
+  @param evaluator: <MAXScriptFunction|UndefinedClass> 条件式を定義した関数。既定値は`undefined`。
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
+  */
+  public fn CreateCondition evaluator:undefined = (
+    this.conditionDef evaluator
   ),
 
   /*-
@@ -404,6 +417,7 @@ struct MwmStruct (
     format "%  applicationDef:%\n" indent this.applicationDef to:out
     format "%  bindingDef:%\n" indent this.bindingDef to:out
     format "%  commandDef:%\n" indent this.commandDef to:out
+    format "%  conditionDef:%\n" indent this.conditionDef to:out
     format "%  converterDef:%\n" indent this.converterDef to:out
     format "%  eventDef:%\n" indent this.eventDef to:out
     format "%  modelAttributeDef:%\n" indent this.modelAttributeDef to:out
@@ -441,6 +455,7 @@ struct MwmStruct (
     this.applicationDef = ::mwmDefinitionPool[@"Model\MwmApplication.ms"]
     this.bindingDef = ::mwmDefinitionPool[@"Model\MwmBinding.ms"]
     this.commandDef = ::mwmDefinitionPool[@"Model\MwmCommand.ms"]
+    this.conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
     this.converterDef = ::mwmDefinitionPool[@"Model\MwmConverter.ms"]
     this.eventDef = ::mwmDefinitionPool[@"Model\MwmEvent.ms"]
     this.modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]

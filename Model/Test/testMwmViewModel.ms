@@ -18,6 +18,7 @@
   fileIn (pathUtility.GetFullPath @"..\..\definitionPool.ms")
   local bindingDef = ::mwmDefinitionPool[@"Model\MwmBinding.ms"]
   local commandDef = ::mwmDefinitionPool[@"Model\MwmCommand.ms"]
+  local conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
   local converterDef = ::mwmDefinitionPool[@"Model\MwmConverter.ms"]
   local eventDef = ::mwmDefinitionPool[@"Model\MwmEvent.ms"]
   local modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]
@@ -138,27 +139,6 @@
     )
   )
 
-  local testToSourceFunction
-  fn testToSourceFunction input = (
-    input as Integer
-  )
-
-  local testToTargetFunction
-  fn testToTargetFunction input = (
-    input as String
-  )
-
-  local testCanExecuteFunction
-  fn testCanExecuteFunction params = (
-    params[1].Value != 0
-  )
-
-  local testExecuteFunction
-  fn testExecuteFunction model params event = (
-    model.Increment params[1].Value
-    ok
-  )
-
   local RltTest
   rollout RltTest "RltTest" (
     editText Edt "Count"
@@ -205,6 +185,27 @@
     ok
   )
 
+  local testToSourceFunction
+  fn testToSourceFunction input = (
+    input as Integer
+  )
+
+  local testToTargetFunction
+  fn testToTargetFunction input = (
+    input as String
+  )
+
+  local testCanExecuteFunction
+  fn testCanExecuteFunction params = (
+    params[1].Value != 0
+  )
+
+  local testExecuteFunction
+  fn testExecuteFunction model params event = (
+    model.Increment params[1].Value
+    ok
+  )
+
   local config = ::std.ConfigStruct()
   local converter = converterDef testToTargetFunction testToSourceFunction
   local model = TestModelStruct()
@@ -217,10 +218,12 @@
   local stepProperty = propertyDef #Step 1 stepAttribute
   stepProperty.SetModel model
 
+  local canExecuteCondition = conditionDef testCanExecuteFunction
+  canExecuteCondition.AddProperty stepProperty
+  local executeCondition = conditionDef()
+  executeCondition.AddProperty stepProperty
   local incrementCommand = commandDef #Increment \
-      testExecuteFunction testCanExecuteFunction modelAttribute
-  incrementCommand.AddCanExecuteProperty stepProperty
-  incrementCommand.AddExecuteProperty stepProperty
+      testExecuteFunction executeCondition canExecuteCondition modelAttribute
 
   local countBinding = bindingDef 1 #Count RltTest.Edt #Entered #Text
   countBinding.SetConverter converter

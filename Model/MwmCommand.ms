@@ -3,47 +3,47 @@
 ビューモデルにコマンドを定義するための構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmCommandStruct commandName executeFunction canExecuteFunction modelAttribute
+    ::MwmCommandStruct commandName executeFunction [executeCondition] [canExecuteCondition] [modelAttribute]
     ```
 
 通知
-:   | 通知名                  | 通知データ                     | タイミング                                     |
-    | ----------------------- | ------------------------------ | ---------------------------------------------- |
-    | `#CanExecuteChanged`    | `CanExecute`メソッドの戻り値   | `RaiseCanExecuteChanged`メソッドが呼ばれた直後 |
-    | `#CanExecuteFunction`   | 新たな`canExecuteFunction`値   | `canExecuteFunction`を設定した後               |
-    | `#CanExecuteProperties` | 新たな`canExecuteProperties`値 | `canExecuteProperties`を設定した後             |
-    | `#CommandName`          | 新たな`commandName`値          | `commandName`を設定した後                      |
-    | `#ExecuteFunction`      | 新たな`executeFunction`値      | `executeFunction`を設定した後                  |
-    | `#ExecuteProperties`    | 新たな`executeProperties`値    | `executeProperties`を設定した後                |
-    | `#Model`                | 新たな`model`値                | `model`を設定した後                            |
-    | `#PostProcessFunction`  | 新たな`postProcessFunction`値  | `postProcessFunction`を設定した後              |
-    | `#PreProcessFunction`   | 新たな`preProcessFunction`値   | `preProcessFunction`を設定した後               |
+:   | 通知名                 | 通知データ                    | タイミング                                     |
+    | ---------------------- | ----------------------------- | ---------------------------------------------- |
+    | `#CanExecuteChanged`   | `CanExecute`メソッドの戻り値  | `RaiseCanExecuteChanged`メソッドが呼ばれた直後 |
+    | `#CanExecuteCondition` | 新たな`canExecuteCondition`値 | `canExecuteCondition`を設定した後              |
+    | `#CommandName`         | 新たな`commandName`値         | `commandName`を設定した後                      |
+    | `#ExecuteCondition`    | 新たな`executeCondition`値    | `executeCondition`を設定した後                 |
+    | `#ExecuteFunction`     | 新たな`executeFunction`値     | `executeFunction`を設定した後                  |
+    | `#Model`               | 新たな`model`値               | `model`を設定した後                            |
+    | `#ModelAttribute`      | 新たな`modelAttribute`値      | `modelAttribute`を設定した後                   |
+    | `#PostProcessFunction` | 新たな`postProcessFunction`値 | `postProcessFunction`を設定した後              |
+    | `#PreProcessFunction`  | 新たな`preProcessFunction`値  | `preProcessFunction`を設定した後               |
 
 オブザーバ
-:   | 購読先                                                 | メソッド                 |
-    | ------------------------------------------------------ | ------------------------ |
-    | `canExecuteProperties`に追加したプロパティオブジェクト | `RaiseCanExecuteChanged` |
+:   | 購読先                                            | メソッド                 |
+    | ------------------------------------------------- | ------------------------ |
+    | `canExecuteCondition`に設定した条件オブジェクト。 | `RaiseCanExecuteChanged` |
 */
 struct MwmCommandStruct (
   /*- @prop <Name> 作成パラメータ1。コマンド名。既定値は`undefined`。 */
   public _CP1_,
   /*- @prop <MAXScriptFunction|UndefinedClass> 作成パラメータ2。コマンドの内容を定義した関数。既定値は`undefined`。 */
   public _CP2_,
-  /*- @prop <MAXScriptFunction|UndefinedClass> 作成パラメータ3。コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ3。コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。 */
   public _CP3_,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ4。モデル属性。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ4。コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
   public _CP4_,
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ5。モデル属性。既定値は`undefined`。 */
+  public _CP5_,
 
-  /*- @prop <MAXScriptFunction|UndefinedClass> コマンドが実行可能かどうかを判定する関数。既定値は`undefined`。 */
-  private canExecuteFunction,
-  /*- @prop <Array[<Struct:MwmPropertyStruct>]> コマンドが実行可能かどうかの判定に使用するプロパティ。既定値は`#()`。 */
-  private canExecuteProperties = #(),
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
+  private canExecuteCondition,
   /*- @prop <Name> コマンド名。バインディングのソース名。既定値は`undefined`。 */
   private commandName,
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。 */
+  private executeCondition,
   /*- @prop <MAXScriptFunction|UndefinedClass> コマンドの内容を定義した関数。既定値は`undefined`。 */
   private executeFunction,
-  /*- @prop <Array[<Struct:MwmPropertyStruct>]> コマンドで使用するプロパティ。既定値は`#()`。 */
-  private executeProperties = #(),
   /*- @prop <Struct|UndefinedClass> モデルオブジェクト。既定値は`undefined`。 */
   private model,
   /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。 */
@@ -54,28 +54,20 @@ struct MwmCommandStruct (
   private preProcessFunction,
 
   /*
-  public fn AddCanExecuteProperty property = (),
-  public fn AddExecuteProperty property = (),
   public fn CanExecute = (),
   public fn Execute = (),
-  public fn GetCanExecuteFunction = (),
-  public fn GetCanExecuteProperties = (),
-  public fn GetCanExecuteProperty propertyName = (),
-  public fn GetCanExecutePropertyNames = (),
+  public fn GetCanExecuteCondition = (),
   public fn GetCommandName = (),
+  public fn GetExecuteCondition = (),
   public fn GetExecuteFunction = (),
-  public fn GetExecuteProperties = (),
-  public fn GetExecuteProperty propertyName = (),
-  public fn GetExecutePropertyNames = (),
   public fn GetModel = (),
   public fn GetModelAttribute = (),
   public fn GetPostProcessFunction = (),
   public fn GetPreProcessFunction = (),
-  public fn HasCanExecuteProperty key = (),
-  public fn HasExecuteProperty key = (),
   public fn RaiseCanExecuteChanged type param = (),
-  public fn SetCanExecuteFunction input = (),
+  public fn SetCanExecuteCondition condition = (),
   public fn SetCommandName input = (),
+  public fn SetExecuteCondition condition = (),
   public fn SetExecuteFunction input = (),
   public fn SetModel obj = (),
   public fn SetModelAttribute obj = (),
@@ -85,6 +77,7 @@ struct MwmCommandStruct (
   private fn findProperty properties property = (),
   private fn findPropertyByName properties propertyName = (),
   private fn getPropertyByName properties propertyName = (),
+  private fn isValidCondition obj = (),
   private fn isValidFunction obj = (),
   private fn isValidModel obj = (),
   private fn isValidModelAttribute obj = (),
@@ -92,53 +85,19 @@ struct MwmCommandStruct (
   private fn isValidProperty obj = (),
   private fn propertiesAsNames properties = (),
   private fn propertiesAsParams properties = (),
+  private fn subscribeCanExecuteCondition = (),
+  private fn unsubscribeCanExecuteCondition = (),
   */
-
-  /*-
-  コマンドが実行可能かどうかの判定に使用するプロパティを追加する。
-  @param property <Struct:MwmPropertyStruct> プロパティオブジェクト。
-  @returns <BooleanClass> 追加に成功した場合は`true`、失敗した場合は`false`。
-  @remarks 無効な値の場合は何もしない。
-  */
-  public fn AddCanExecuteProperty property = (
-    if this.isValidProperty property do (
-      if this.findProperty this.canExecuteProperties property == 0 do (
-        append this.canExecuteProperties property
-        if this.isValidObservable property.StateChanged do (
-          property.StateChanged.Subscribe this.RaiseCanExecuteChanged
-        )
-        this.StateChanged.Notify #CanExecuteProperties this.canExecuteProperties
-      )
-    )
-    this.findProperty this.canExecuteProperties property > 0
-  ),
-
-  /*-
-  コマンドの実行に使用するプロパティを追加する。
-  @param property <Struct:MwmPropertyStruct> プロパティオブジェクト。
-  @returns <BooleanClass> 追加に成功した場合は`true`、失敗した場合は`false`。
-  @remarks 無効な値の場合は何もしない。
-  */
-  public fn AddExecuteProperty property = (
-    if this.isValidProperty property do (
-      if this.findProperty this.executeProperties property == 0 do (
-        append this.executeProperties property
-        this.StateChanged.Notify #ExecuteProperties this.executeProperties
-      )
-    )
-    this.findProperty this.executeProperties property > 0
-  ),
 
   /*-
   コマンドが実行可能かどうかを判定する。
   @returns <BooleanClass>
-  @remarks `canExecuteFunction`が未指定の場合は`true`を返す。
+  @remarks 条件式が真偽値以外を返した場合は`true`を返す。
   */
   public fn CanExecute = (
     local result = true
-    if this.isValidFunction this.canExecuteFunction do (
-      local params = this.propertiesAsParams this.canExecuteProperties
-      result = this.canExecuteFunction params
+    if this.isValidCondition this.canExecuteCondition do (
+      result = this.canExecuteCondition.Evaluate()
       if classOf result != BooleanClass do (
         result = true
       )
@@ -153,7 +112,10 @@ struct MwmCommandStruct (
   */
   public fn Execute event = (
     if this.CanExecute() do (
-      local params = this.propertiesAsParams this.executeProperties
+      local params = #()
+      if this.isValidCondition this.executeCondition do (
+        params = this.executeCondition.MakeParams()
+      )
       if this.isValidFunction this.preProcessFunction do (
         this.preProcessFunction this.model params event
       )
@@ -168,37 +130,11 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  コマンドが実行可能かどうかを判定する関数を取得する。
-  @returns <MAXScriptFunction|UndefinedClass>
+  コマンドが実行可能かどうかを判定する条件オブジェクトを取得する。
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
   */
-  public fn GetCanExecuteFunction = (
-    this.canExecuteFunction
-  ),
-
-  /*-
-  コマンドが実行可能かどうかの判定に使用するプロパティを全て取得する。
-  @returns <Array[<Struct:MwmPropertyStruct>]>
-  */
-  public fn GetCanExecuteProperties = (
-    this.canExecuteProperties
-  ),
-
-  /*-
-  コマンドが実行可能かどうかの判定に使用するプロパティを取得する。
-  @param propertyName <Name> プロパティ名。
-  @returns <Struct:MwmPropertyStruct|UndefinedClass>
-  @remarks 無効な値の場合は`undefined`を返す。
-  */
-  public fn GetCanExecuteProperty propertyName = (
-    this.getPropertyByName this.canExecuteProperties propertyName
-  ),
-
-  /*-
-  コマンドが実行可能かどうかの判定に使用するプロパティのプロパティ名を取得する。
-  @returns <Array[<Name>]>
-  */
-  public fn GetCanExecutePropertyNames = (
-    this.propertiesAsNames this.canExecuteProperties
+  public fn GetCanExecuteCondition = (
+    this.canExecuteCondition
   ),
 
   /*-
@@ -210,37 +146,19 @@ struct MwmCommandStruct (
   ),
 
   /*-
+  コマンドで使用するプロパティを格納した条件オブジェクトを取得する。
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
+  */
+  public fn GetExecuteCondition = (
+    this.executeCondition
+  ),
+
+  /*-
   コマンドの内容を定義した関数を取得する。
   @returns <MAXScriptFunction|UndefinedClass>
   */
   public fn GetExecuteFunction = (
     this.executeFunction
-  ),
-
-  /*-
-  コマンドで使用するプロパティを全て取得する。
-  @returns <Array[<Struct:MwmPropertyStruct>]>
-  */
-  public fn GetExecuteProperties = (
-    this.executeProperties
-  ),
-
-  /*-
-  コマンドで使用するプロパティを取得する。
-  @param propertyName <Name> プロパティ名。
-  @returns <Struct:MwmPropertyStruct|UndefinedClass>
-  @remarks 無効な値の場合は`undefined`を返す。
-  */
-  public fn GetExecuteProperty propertyName = (
-    this.getPropertyByName this.executeProperties propertyName
-  ),
-
-  /*-
-  コマンドで使用するプロパティのプロパティ名を取得する。
-  @returns <Array[<Name>]>
-  */
-  public fn GetExecutePropertyNames = (
-    this.propertiesAsNames this.executeProperties
   ),
 
   /*-
@@ -276,32 +194,6 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  コマンドが実行可能かどうかの判定に使用するプロパティが登録済みかどうかを判定する。
-  @param key <Struct:MwmPropertyStruct|Name> プロパティオブジェクトまたはプロパティ名。
-  @returns <BooleanClass>
-  */
-  public fn HasCanExecuteProperty key = (
-    local propertyName = key
-    if this.isValidProperty key do (
-      propertyName = key.GetPropertyName()
-    )
-    this.findPropertyByName this.canExecuteProperties propertyName > 0
-  ),
-
-  /*-
-  コマンドで使用するプロパティが登録済みかどうかを判定する。
-  @param key <Struct:MwmPropertyStruct|Name> プロパティオブジェクトまたはプロパティ名。
-  @returns <BooleanClass>
-  */
-  public fn HasExecuteProperty key = (
-    local propertyName = key
-    if this.isValidProperty key do (
-      propertyName = key.GetPropertyName()
-    )
-    this.findPropertyByName this.executeProperties propertyName > 0
-  ),
-
-  /*-
   コマンドが実行可能かどうかの変更通知を発行する。
   @param type <Name>
   @param param <Any>
@@ -309,7 +201,7 @@ struct MwmCommandStruct (
   */
   public fn RaiseCanExecuteChanged type param = (
     case type of (
-      (#PropertyValue): (
+      (#ConditionChanged): (
         this.CanExecuteChanged.Notify #CanExecuteChanged (this.CanExecute())
       )
       default: ()
@@ -318,34 +210,19 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  コマンドが実行可能かどうかを判定する関数を設定する。
-  @param input <MAXScriptFunction>
-  @returns <MAXScriptFunction|UndefinedClass>
+  コマンドが実行可能かどうかを判定する条件オブジェクトを設定する。
+  @param condition <Struct:MwmConditionStruct>
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
   @remarks 無効な値の場合は何もしない。
-  指定する関数は次のように実装する。
-
-  ```maxscript
-  fn exampleCanExecuteFunction params = (
-    params.Count == 2 \
-        and params[1].Name == #Foo and params[1].Value == 0 \
-        and params[2].Name == #Bar and params[2].Value == 1
-  )
-  ```
-
-  * 引数はプロパティ名とプロパティ値のペアの配列を一つ取る。
-
-    | 引数     | 型                                            |
-    | -------- | --------------------------------------------- |
-    | `params` | `<Array[<DataPair Name:<Name> Value:<Any>>]>` |
-
-  * 真偽値を返す。既定の戻り値は`false`。
   */
-  public fn SetCanExecuteFunction input = (
-    if this.isValidFunction input do (
-      this.canExecuteFunction = input
-      this.StateChanged.Notify #CanExecuteFunction this.canExecuteFunction
+  public fn SetCanExecuteCondition condition = (
+    if this.isValidCondition condition do (
+      this.unsubscribeCanExecuteCondition()
+      this.canExecuteCondition = condition
+      this.subscribeCanExecuteCondition()
+      this.StateChanged.Notify #CanExecuteCondition this.canExecuteCondition
     )
-    this.GetCanExecuteFunction()
+    this.GetCanExecuteCondition()
   ),
 
   /*-
@@ -360,6 +237,20 @@ struct MwmCommandStruct (
       this.StateChanged.Notify #CommandName this.commandName
     )
     this.GetCommandName()
+  ),
+
+  /*-
+  コマンドで使用するプロパティを格納した条件オブジェクトを設定する。
+  @param condition <Struct:MwmConditionStruct>
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
+  @remarks 無効な値の場合は何もしない。
+  */
+  public fn SetExecuteCondition condition = (
+    if this.isValidCondition condition do (
+      this.executeCondition = condition
+      this.StateChanged.Notify #ExecuteCondition this.executeCondition
+    )
+    this.GetExecuteCondition()
   ),
 
   /*-
@@ -504,6 +395,17 @@ struct MwmCommandStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidCondition obj = (
+    isStruct obj \
+        and isProperty obj #StructName \
+        and classOf obj.StructName == MAXScriptFunction \
+        and obj.StructName() == #MwmConditionStruct
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidFunction obj = (
     classOf obj == MAXScriptFunction
   ),
@@ -573,6 +475,30 @@ struct MwmCommandStruct (
     )
   ),
 
+  /*-
+  コマンドが実行可能かどうかを判定する条件オブジェクトを購読する。
+  @returns <OkClass>
+  */
+  private fn subscribeCanExecuteCondition = (
+    if this.isValidCondition this.canExecuteCondition \
+        and this.isValidObservable this.canExecuteCondition.StateChanged do (
+      this.canExecuteCondition.StateChanged.Subscribe this.RaiseCanExecuteChanged
+    )
+    ok
+  ),
+
+  /*-
+  コマンドが実行可能かどうかを判定する条件オブジェクトの購読を解除する。
+  @returns <OkClass>
+  */
+  private fn unsubscribeCanExecuteCondition = (
+    if this.isValidCondition this.canExecuteCondition \
+        and this.isValidObservable this.canExecuteCondition.StateChanged do (
+      this.canExecuteCondition.StateChanged.Unsubscribe this.RaiseCanExecuteChanged
+    )
+    ok
+  ),
+
   /*- @returns <Name> */
   public fn StructName = #MwmCommandStruct,
 
@@ -583,19 +509,22 @@ struct MwmCommandStruct (
   */
   public fn Dump indent:"" out:listener = (
     format "%MwmCommandStruct\n" indent to:out
-    format "%  canExecuteFunction:%\n" indent this.canExecuteFunction to:out
-    format "%  canExecuteProperties:%\n" indent this.canExecuteProperties.Count to:out
-    for i = 1 to this.canExecuteProperties.Count do (
-      format "%    [%]:\n" indent i to:out
-      this.canExecuteProperties[i].Dump indent:(indent + "      ") out:out
+    if this.isValidCondition this.canExecuteCondition then (
+      format "%  canExecuteCondition:\n" indent to:out
+      this.canExecuteCondition.Dump indent:(indent + "    ") out:out
+    )
+    else (
+      format "%  canExecuteCondition:%\n" indent this.canExecuteCondition to:out
     )
     format "%  commandName:%\n" indent this.commandName to:out
-    format "%  executeFunction:%\n" indent this.executeFunction to:out
-    format "%  executeProperties:%\n" indent this.executeProperties.Count to:out
-    for i = 1 to this.executeProperties.Count do (
-      format "%    [%]:\n" indent i to:out
-      this.executeProperties[i].Dump indent:(indent + "      ") out:out
+    if this.isValidCondition this.executeCondition then (
+      format "%  executeCondition:\n" indent to:out
+      this.executeCondition.Dump indent:(indent + "    ") out:out
     )
+    else (
+      format "%  executeCondition:%\n" indent this.executeCondition to:out
+    )
+    format "%  executeFunction:%\n" indent this.executeFunction to:out
     if this.isValidModel this.model \
         and isProperty this.model #StructName \
         and classOf this.model.StructName == MAXScriptFunction \
@@ -631,19 +560,16 @@ struct MwmCommandStruct (
         and obj.StructName() == this.StructName()
 
     local isEqualProperties = true \
-        and isProperty obj #GetCanExecuteFunction \
-        and classOf obj.GetCanExecuteFunction == MAXScriptFunction \
-        and obj.GetCanExecuteFunction() == this.GetCanExecuteFunction() \
-        and isProperty obj #GetCanExecuteProperties \
-        and classOf obj.GetCanExecuteProperties == MAXScriptFunction \
+        and isProperty obj #GetCanExecuteCondition \
+        and classOf obj.GetCanExecuteCondition == MAXScriptFunction \
         and isProperty obj #GetCommandName \
         and classOf obj.GetCommandName == MAXScriptFunction \
         and obj.GetCommandName() == this.GetCommandName() \
+        and isProperty obj #GetExecuteCondition \
+        and classOf obj.GetExecuteCondition == MAXScriptFunction \
         and isProperty obj #GetExecuteFunction \
         and classOf obj.GetExecuteFunction == MAXScriptFunction \
         and obj.GetExecuteFunction() == this.GetExecuteFunction() \
-        and isProperty obj #GetExecuteProperties \
-        and classOf obj.GetExecuteProperties == MAXScriptFunction \
         and isProperty obj #GetModel \
         and classOf obj.GetModel == MAXScriptFunction \
         and isProperty obj #GetModelAttribute \
@@ -656,30 +582,24 @@ struct MwmCommandStruct (
         and obj.GetPreProcessFunction() == this.GetPreProcessFunction()
 
     if isEqualProperties do (
-      local ov = obj.GetCanExecuteProperties()
-      local tv = this.GetCanExecuteProperties()
-      isEqualProperties = classOf ov == Array and classOf tv == Array
-      if isEqualProperties do (
-        isEqualProperties = ov.Count == tv.Count
+      local ov = obj.GetCanExecuteCondition()
+      local tv = this.GetCanExecuteCondition()
+      if this.isValidCondition tv then (
+        isEqualProperties = tv.Equals ov
       )
-      if isEqualProperties do (
-        for i = 1 to tv.Count while isEqualProperties do (
-          isEqualProperties = this.isValidProperty tv[i] and tv[i].Equals ov[i]
-        )
+      else (
+        isEqualProperties = ov == tv
       )
     )
 
     if isEqualProperties do (
-      local ov = obj.GetExecuteProperties()
-      local tv = this.GetExecuteProperties()
-      isEqualProperties = classOf ov == Array and classOf tv == Array
-      if isEqualProperties do (
-        isEqualProperties = ov.Count == tv.Count
+      local ov = obj.GetExecuteCondition()
+      local tv = this.GetExecuteCondition()
+      if this.isValidCondition tv then (
+        isEqualProperties = tv.Equals ov
       )
-      if isEqualProperties do (
-        for i = 1 to tv.Count while isEqualProperties do (
-          isEqualProperties = this.isValidProperty tv[i] and tv[i].Equals ov[i]
-        )
+      else (
+        isEqualProperties = ov == tv
       )
     )
 
@@ -720,7 +640,8 @@ struct MwmCommandStruct (
     this.StateChanged = ::std.ObservableStruct()
     this.SetCommandName this._CP1_
     this.SetExecuteFunction this._CP2_
-    this.SetCanExecuteFunction this._CP3_
-    this.SetModelAttribute this._CP4_
+    this.SetExecuteCondition this._CP3_
+    this.SetCanExecuteCondition this._CP4_
+    this.SetModelAttribute this._CP5_
   )
 )
