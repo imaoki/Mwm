@@ -286,7 +286,7 @@
   /* RaiseCanExecuteChanged */
   -- コマンドが実行可能かどうかを判定する条件オブジェクトが未定義なので失敗
   expectedCanExecute = true
-  actual = ::TestValueStruct (testObj.RaiseCanExecuteChanged #PropertyValue 0)
+  actual = ::TestValueStruct (testObj.RaiseCanExecuteChanged #ConditionChanged 0)
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
 
