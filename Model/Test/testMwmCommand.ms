@@ -23,9 +23,6 @@
 
   local TestModelStruct
   struct TestModelStruct (
-    public PostProcessValue,
-    public PreProcessValue,
-
     private firstName = "",
     private fullName = "",
     private lastName = "",
@@ -153,8 +150,6 @@
   local expectedExecuteFunction = undefined
   local expectedModel = undefined
   local expectedModelAttribute = undefined
-  local expectedPostProcessFunction = undefined
-  local expectedPreProcessFunction = undefined
 
   local testNotification
   fn testNotification type param = (
@@ -195,16 +190,6 @@
         expected = ::TestValueStruct expectedModelAttribute
         assert (actual.Equals expected == true)
       )
-      (#PostProcessFunction): (
-        actual = ::TestValueStruct (testObj.GetPostProcessFunction())
-        expected = ::TestValueStruct expectedPostProcessFunction
-        assert (actual.Equals expected == true)
-      )
-      (#PreProcessFunction): (
-        actual = ::TestValueStruct (testObj.GetPreProcessFunction())
-        expected = ::TestValueStruct expectedPreProcessFunction
-        assert (actual.Equals expected == true)
-      )
       default: ()
     )
     ok
@@ -224,18 +209,6 @@
   local testExecuteFunction
   fn testExecuteFunction model params event = (
     model.Submit params[1].Value params[2].Value
-    ok
-  )
-
-  local testPostProcessFunction
-  fn testPostProcessFunction model params event = (
-    model.PostProcessValue = 1
-    ok
-  )
-
-  local testPreProcessFunction
-  fn testPreProcessFunction model params event = (
-    model.PreProcessValue = 2
     ok
   )
 
@@ -307,18 +280,6 @@
   /* GetModelAttribute */
   -- 既定値
   actual = ::TestValueStruct (testObj.GetModelAttribute())
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetPostProcessFunction */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetPostProcessFunction())
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-
-  /* GetPreProcessFunction */
-  -- 既定値
-  actual = ::TestValueStruct (testObj.GetPreProcessFunction())
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
@@ -414,28 +375,6 @@
   expectedModelAttribute = modelAttribute
   actual = ::TestValueStruct (testObj.SetModelAttribute modelAttribute)
   expected = ::TestValueStruct expectedModelAttribute
-  assert (actual.Equals expected == true)
-
-  /* SetPostProcessFunction */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.SetPostProcessFunction 0)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedPostProcessFunction = testPostProcessFunction
-  actual = ::TestValueStruct (testObj.SetPostProcessFunction testPostProcessFunction)
-  expected = ::TestValueStruct expectedPostProcessFunction
-  assert (actual.Equals expected == true)
-
-  /* SetPreProcessFunction */
-  -- 無効な値
-  actual = ::TestValueStruct (testObj.SetPreProcessFunction 0)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-  -- 成功
-  expectedPreProcessFunction = testPreProcessFunction
-  actual = ::TestValueStruct (testObj.SetPreProcessFunction testPreProcessFunction)
-  expected = ::TestValueStruct expectedPreProcessFunction
   assert (actual.Equals expected == true)
 
   /* CanExecute */

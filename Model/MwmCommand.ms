@@ -16,8 +16,6 @@
     | `#ExecuteFunction`     | 新たな`executeFunction`値     | `executeFunction`を設定した後                  |
     | `#Model`               | 新たな`model`値               | `model`を設定した後                            |
     | `#ModelAttribute`      | 新たな`modelAttribute`値      | `modelAttribute`を設定した後                   |
-    | `#PostProcessFunction` | 新たな`postProcessFunction`値 | `postProcessFunction`を設定した後              |
-    | `#PreProcessFunction`  | 新たな`preProcessFunction`値  | `preProcessFunction`を設定した後               |
 
 オブザーバ
 :   | 購読先                                            | メソッド                 |
@@ -48,10 +46,6 @@ struct MwmCommandStruct (
   private model,
   /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。 */
   private modelAttribute,
-  /*- @prop <MAXScriptFunction|UndefinedClass> コマンドを実行する後に呼び出される関数。既定値は`undefined`。 */
-  private postProcessFunction,
-  /*- @prop <MAXScriptFunction|UndefinedClass> コマンドを実行する前に呼び出される関数。既定値は`undefined`。 */
-  private preProcessFunction,
 
   /*
   public fn CanExecute = (),
@@ -62,8 +56,6 @@ struct MwmCommandStruct (
   public fn GetExecuteFunction = (),
   public fn GetModel = (),
   public fn GetModelAttribute = (),
-  public fn GetPostProcessFunction = (),
-  public fn GetPreProcessFunction = (),
   public fn RaiseCanExecuteChanged type param = (),
   public fn SetCanExecuteCondition condition = (),
   public fn SetCommandName input = (),
@@ -71,20 +63,13 @@ struct MwmCommandStruct (
   public fn SetExecuteFunction input = (),
   public fn SetModel obj = (),
   public fn SetModelAttribute obj = (),
-  public fn SetPostProcessFunction input = (),
-  public fn SetPreProcessFunction input = (),
 
-  private fn findProperty properties property = (),
-  private fn findPropertyByName properties propertyName = (),
-  private fn getPropertyByName properties propertyName = (),
   private fn isValidCondition obj = (),
   private fn isValidFunction obj = (),
   private fn isValidModel obj = (),
   private fn isValidModelAttribute obj = (),
   private fn isValidObservable obj = (),
   private fn isValidProperty obj = (),
-  private fn propertiesAsNames properties = (),
-  private fn propertiesAsParams properties = (),
   private fn subscribeCanExecuteCondition = (),
   private fn unsubscribeCanExecuteCondition = (),
   */
@@ -116,14 +101,8 @@ struct MwmCommandStruct (
       if this.isValidCondition this.executeCondition do (
         params = this.executeCondition.MakeParams()
       )
-      if this.isValidFunction this.preProcessFunction do (
-        this.preProcessFunction this.model params event
-      )
       if this.isValidFunction this.executeFunction do (
         this.executeFunction this.model params event
-      )
-      if this.isValidFunction this.postProcessFunction do (
-        this.postProcessFunction this.model params event
       )
     )
     ok
@@ -175,22 +154,6 @@ struct MwmCommandStruct (
   */
   public fn GetModelAttribute = (
     this.modelAttribute
-  ),
-
-  /*-
-  コマンドを実行する後に呼び出される関数を設定する。
-  @returns <MAXScriptFunction|UndefinedClass>
-  */
-  public fn GetPostProcessFunction = (
-    this.postProcessFunction
-  ),
-
-  /*-
-  コマンドを実行する前に呼び出される関数を設定する。
-  @returns <MAXScriptFunction|UndefinedClass>
-  */
-  public fn GetPreProcessFunction = (
-    this.preProcessFunction
   ),
 
   /*-
@@ -314,84 +277,6 @@ struct MwmCommandStruct (
   ),
 
   /*-
-  コマンドを実行する後に呼び出される関数を設定する。
-  @param input <MAXScriptFunction>
-  @returns <MAXScriptFunction|UndefinedClass>
-  @remarks 無効な値の場合は何もしない。
-  指定する関数は`SetExecuteFunction`と同様に実装する。
-  */
-  public fn SetPostProcessFunction input = (
-    if this.isValidFunction input do (
-      this.postProcessFunction = input
-      this.StateChanged.Notify #PostProcessFunction this.postProcessFunction
-    )
-    this.GetPostProcessFunction()
-  ),
-
-  /*-
-  コマンドを実行する前に呼び出される関数を設定する。
-  @param input <MAXScriptFunction>
-  @returns <MAXScriptFunction|UndefinedClass>
-  @remarks 無効な値の場合は何もしない。
-  指定する関数は`SetExecuteFunction`と同様に実装する。
-  */
-  public fn SetPreProcessFunction input = (
-    if this.isValidFunction input do (
-      this.preProcessFunction = input
-      this.StateChanged.Notify #PreProcessFunction this.preProcessFunction
-    )
-    this.GetPreProcessFunction()
-  ),
-
-  /*-
-  プロパティを検索する。
-  @param properties <Array[<Struct:MwmPropertyStruct>]>
-  @param property <Struct:MwmPropertyStruct>
-  @returns <Integer>
-  */
-  private fn findProperty properties property = (
-    local index = 0
-    if this.isValidProperty property do (
-      index = this.findPropertyByName properties (property.GetPropertyName())
-    )
-    index
-  ),
-
-  /*-
-  プロパティ名でプロパティを検索する。
-  @param properties <Array[<Struct:MwmPropertyStruct>]>
-  @param propertyName <Name>
-  @returns <Integer>
-  */
-  private fn findPropertyByName properties propertyName = (
-    local index = 0
-    if classOf propertyName == Name do (
-      for i = 1 to properties.Count while index == 0 do (
-        if this.isValidProperty properties[i] \
-            and properties[i].GetPropertyName() == propertyName do (
-          index = i
-        )
-      )
-    )
-    index
-  ),
-
-  /*-
-  プロパティ名からプロパティを取得する。
-  @param properties <Array[<Struct:MwmPropertyStruct>]>
-  @param propertyName <Name>
-  @returns <Struct:MwmPropertyStruct|UndefinedClass>
-  */
-  private fn getPropertyByName properties propertyName = (
-    local property = undefined
-    local index = this.findPropertyByName properties propertyName
-    if 1 <= index and index <= properties.Count do (
-      property = properties[index]
-    )
-    property
-  ),
-
-  /*-
   @param obj <Any>
   @returns <BooleanClass>
   */
@@ -449,30 +334,6 @@ struct MwmCommandStruct (
         and isProperty obj #StructName \
         and classOf obj.StructName == MAXScriptFunction \
         and obj.StructName() == #MwmPropertyStruct
-  ),
-
-  /*-
-  プロパティ配列をプロパティ名の配列に変換する。
-  @param properties <Array[<Struct:MwmPropertyStruct>]>
-  @returns <Array[<Name>]>
-  */
-  private fn propertiesAsNames properties = (
-    for property in properties where this.isValidProperty property collect (
-      property.GetPropertyName()
-    )
-  ),
-
-  /*-
-  プロパティ配列をプロパティ名とプロパティ値のペアの配列に変換する。
-  @param properties <Array[<Struct:MwmPropertyStruct>]>
-  @returns <Array[<DataPair Name:<Name> Value:<Any>>]>
-  */
-  private fn propertiesAsParams properties = (
-    for property in properties where this.isValidProperty property collect (
-      local propertyName = property.GetPropertyName()
-      local propertyValue = property.GetPropertyValue()
-      DataPair Name:propertyName Value:propertyValue
-    )
   ),
 
   /*-
@@ -543,8 +404,6 @@ struct MwmCommandStruct (
     else (
       format "%  modelAttribute:%\n" indent this.modelAttribute to:out
     )
-    format "%  postProcessFunction:%\n" indent this.postProcessFunction to:out
-    format "%  preProcessFunction:%\n" indent this.preProcessFunction to:out
     ok
   ),
 
@@ -573,13 +432,7 @@ struct MwmCommandStruct (
         and isProperty obj #GetModel \
         and classOf obj.GetModel == MAXScriptFunction \
         and isProperty obj #GetModelAttribute \
-        and classOf obj.GetModelAttribute == MAXScriptFunction \
-        and isProperty obj #GetPostProcessFunction \
-        and classOf obj.GetPostProcessFunction == MAXScriptFunction \
-        and obj.GetPostProcessFunction() == this.GetPostProcessFunction() \
-        and isProperty obj #GetPreProcessFunction \
-        and classOf obj.GetPreProcessFunction == MAXScriptFunction \
-        and obj.GetPreProcessFunction() == this.GetPreProcessFunction()
+        and classOf obj.GetModelAttribute == MAXScriptFunction
 
     if isEqualProperties do (
       local ov = obj.GetCanExecuteCondition()
