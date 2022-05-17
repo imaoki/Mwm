@@ -479,7 +479,7 @@ struct MwmApplicationStruct (
             and this.isValidViewModel menuViewModel do (
           local commandAttribute = this.modelAttributeDef viewName
           local openCommand = this.commandDef \
-              #MenuOpen this.onMenuOpen undefined commandAttribute
+              #MenuOpen this.onMenuOpen commandAttribute
           local openBinding = this.bindingDef 1 #MenuOpen menuDef #Open
           menuViewModel.AddModel viewName view
           menuViewModel.AddCommand openCommand
@@ -506,13 +506,13 @@ struct MwmApplicationStruct (
             and this.isValidViewModel rolloutViewModel do (
           local commandAttribute = this.modelAttributeDef viewName
           local closeCommand = this.commandDef \
-              #RolloutClose this.onRolloutClose undefined commandAttribute
+              #RolloutClose this.onRolloutClose commandAttribute
           local movedCommand = this.commandDef \
-              #RolloutMoved this.onRolloutMoved undefined commandAttribute
+              #RolloutMoved this.onRolloutMoved commandAttribute
           local openCommand = this.commandDef \
-              #RolloutOpen this.onRolloutOpen undefined commandAttribute
+              #RolloutOpen this.onRolloutOpen commandAttribute
           local resizedCommand = this.commandDef \
-              #RolloutResized this.onRolloutResized undefined commandAttribute
+              #RolloutResized this.onRolloutResized commandAttribute
 
           local closeBinding = this.bindingDef 1 #RolloutClose rolloutDef #Close
           local movedBinding = this.bindingDef 1 #RolloutMoved rolloutDef #Moved

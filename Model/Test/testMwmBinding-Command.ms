@@ -255,8 +255,8 @@
   canExecuteCondition.AddProperty stepProperty
   local executeCondition = conditionDef()
   executeCondition.AddProperty stepProperty
-  local incrementCommand = commandDef #Increment \
-      testExecuteFunction executeCondition canExecuteCondition modelAttribute
+  local incrementCommand = commandDef #Increment testExecuteFunction \
+      modelAttribute executeCondition canExecuteCondition
   incrementCommand.SetModel model
 
   createDialog RltTest 160 160 \

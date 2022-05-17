@@ -222,8 +222,8 @@
   canExecuteCondition.AddProperty stepProperty
   local executeCondition = conditionDef()
   executeCondition.AddProperty stepProperty
-  local incrementCommand = commandDef #Increment \
-      testExecuteFunction executeCondition canExecuteCondition modelAttribute
+  local incrementCommand = commandDef #Increment testExecuteFunction \
+      modelAttribute executeCondition canExecuteCondition
 
   local countBinding = bindingDef 1 #Count RltTest.Edt #Entered #Text
   countBinding.SetConverter converter

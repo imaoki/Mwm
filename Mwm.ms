@@ -50,7 +50,7 @@ struct MwmStruct (
   /*
   public fn AddConverter converterName converter = (),
   public fn CreateApplication applicationName startupViewName applicationFile:undefined = (),
-  public fn CreateCommand commandName executeFunction:undefined executeCondition:undefined canExecuteCondition:undefined modelAttribute:undefined = (),
+  public fn CreateCommand commandName executeFunction:undefined modelAttribute:undefined executeCondition:undefined canExecuteCondition:undefined = (),
   public fn CreateCommandBinding commandName target targetEventName = (),
   public fn CreateCondition evaluator:undefined = (),
   public fn CreateConverter toTargetFunction toSourceFunction = (),
@@ -115,16 +115,16 @@ struct MwmStruct (
   コマンドを作成する。
   @param commandName <Name> コマンド名。
   @param executeFunction: <MAXScriptFunction|UndefinedClass> コマンドの内容を定義した関数。既定値は`undefined`。
+  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
   @param executeCondition: <Struct:MwmConditionStruct|UndefinedClass> コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。
   @param canExecuteCondition: <Struct:MwmConditionStruct|UndefinedClass> コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。
-  @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
   @returns <Struct:MwmCommandStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
-  public fn CreateCommand commandName executeFunction:undefined executeCondition:undefined canExecuteCondition:undefined modelAttribute:undefined = (
+  public fn CreateCommand commandName executeFunction:undefined modelAttribute:undefined executeCondition:undefined canExecuteCondition:undefined = (
     local command = undefined
     if classOf commandName == Name do (
-      command = this.commandDef commandName executeFunction executeCondition canExecuteCondition modelAttribute
+      command = this.commandDef commandName executeFunction modelAttribute executeCondition canExecuteCondition
     )
     command
   ),

@@ -3,7 +3,7 @@
 ビューモデルにコマンドを定義するための構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmCommandStruct commandName executeFunction [executeCondition] [canExecuteCondition] [modelAttribute]
+    ::MwmCommandStruct commandName executeFunction [modelAttribute] [executeCondition] [canExecuteCondition]
     ```
 
 通知
@@ -27,11 +27,11 @@ struct MwmCommandStruct (
   public _CP1_,
   /*- @prop <MAXScriptFunction|UndefinedClass> 作成パラメータ2。コマンドの内容を定義した関数。既定値は`undefined`。 */
   public _CP2_,
-  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ3。コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ3。モデル属性。既定値は`undefined`。 */
   public _CP3_,
-  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ4。コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ4。コマンドで使用するプロパティを格納した条件オブジェクト。既定値は`undefined`。 */
   public _CP4_,
-  /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ5。モデル属性。既定値は`undefined`。 */
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ5。コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
   public _CP5_,
 
   /*- @prop <Struct:MwmConditionStruct|UndefinedClass> コマンドが実行可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
@@ -493,8 +493,8 @@ struct MwmCommandStruct (
     this.StateChanged = ::std.ObservableStruct()
     this.SetCommandName this._CP1_
     this.SetExecuteFunction this._CP2_
-    this.SetExecuteCondition this._CP3_
-    this.SetCanExecuteCondition this._CP4_
-    this.SetModelAttribute this._CP5_
+    this.SetModelAttribute this._CP3_
+    this.SetExecuteCondition this._CP4_
+    this.SetCanExecuteCondition this._CP5_
   )
 )

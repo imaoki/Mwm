@@ -400,7 +400,7 @@
   -- testObj.Dump()
 
   /* 作成パラメータ */
-  testObj = testDef #Submit testExecuteFunction executeCondition canExecuteCondition modelAttribute
+  testObj = testDef #Submit testExecuteFunction modelAttribute executeCondition canExecuteCondition
   testObj.CanExecuteChanged.Subscribe testNotification
   testObj.StateChanged.Subscribe testNotification
   -- GetCommandName
@@ -432,7 +432,7 @@
   -- 等しい
   actual = ::TestValueStruct testObj
   expected = ::TestValueStruct (
-    testDef #Submit testExecuteFunction executeCondition canExecuteCondition modelAttribute
+    testDef #Submit testExecuteFunction modelAttribute executeCondition canExecuteCondition
   )
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
