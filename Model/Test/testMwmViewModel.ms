@@ -30,10 +30,10 @@
     private step = 1,
 
     /*
-    public fn Decrement = (),
+    public fn Decrement subtrahend = (),
     public fn GetCount = (),
     public fn GetStep = (),
-    public fn Increment = (),
+    public fn Increment addend = (),
     public fn SetCount input = (),
     public fn SetStep input = (),
     */
