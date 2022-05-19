@@ -241,7 +241,6 @@
     ok
   )
 
-  local application2 = undefined
   local model = TestModelStruct()
   local view = ::std.DialogStruct RltTest
   view.SetMenuDef MnuTest
@@ -685,7 +684,6 @@
   expected = ::TestValueStruct (testDef())
   assert (actual.Equals expected == false)
   -- 等しい
-  -- application2 = testDe
   actual = ::TestValueStruct testObj
   expected = ::TestValueStruct (testDef #TestApplication #RltTest currentFile)
   assert (actual.Equals expected == true)

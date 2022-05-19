@@ -25,6 +25,7 @@
     | ------------------------------------ | --------------- |
     | `MwmCommandStruct.CanExecuteChanged` | `SourceChanged` |
     | `MwmCommandStruct.StateChanged`      | `SourceChanged` |
+    | `MwmPropertyStruct.EnabledChanged`   | `SourceChanged` |
     | `MwmPropertyStruct.StateChanged`     | `SourceChanged` |
     | `MwmViewModelStruct.targetChanged`   | `TargetChanged` |
 */
@@ -406,6 +407,7 @@ struct MwmBindingStruct (
   public fn SourceChanged type param = (
     case type of (
       (#CanExecuteChanged): this.updateTargetEnabled()
+      (#EnabledChanged): this.updateTargetEnabled()
       (#PropertyValue): (
         if #{1, 2}[this.mode] do (
           this.updateTargetPropertyValue()
@@ -538,13 +540,23 @@ struct MwmBindingStruct (
   @returns <OkClass>
   */
   private fn subscribeSource = (
-    local isCommand = this.isValidCommand this.source
-    if isCommand or this.isValidProperty this.source do (
+    if this.isValidCommand this.source then (
+      this.source.CanExecuteChanged.Subscribe this.SourceChanged
       this.source.StateChanged.Subscribe this.SourceChanged
-      if isCommand do (
-        this.source.CanExecuteChanged.Subscribe this.SourceChanged
+    )
+    else (
+      if this.isValidProperty this.source do (
+        this.source.EnabledChanged.Subscribe this.SourceChanged
+        this.source.StateChanged.Subscribe this.SourceChanged
       )
     )
+    -- local isCommand = this.isValidCommand this.source
+    -- if isCommand or this.isValidProperty this.source do (
+    --   this.source.StateChanged.Subscribe this.SourceChanged
+    --   if isCommand do (
+    --     this.source.CanExecuteChanged.Subscribe this.SourceChanged
+    --   )
+    -- )
     ok
   ),
 
@@ -553,13 +565,23 @@ struct MwmBindingStruct (
   @returns <OkClass>
   */
   private fn unsubscribeSource = (
-    local isCommand = this.isValidCommand this.source
-    if isCommand or this.isValidProperty this.source do (
+    if this.isValidCommand this.source then (
+      this.source.CanExecuteChanged.Unsubscribe this.SourceChanged
       this.source.StateChanged.Unsubscribe this.SourceChanged
-      if isCommand do (
-        this.source.CanExecuteChanged.Unsubscribe this.SourceChanged
+    )
+    else (
+      if this.isValidProperty this.source do (
+        this.source.EnabledChanged.Unsubscribe this.SourceChanged
+        this.source.StateChanged.Unsubscribe this.SourceChanged
       )
     )
+    -- local isCommand = this.isValidCommand this.source
+    -- if isCommand or this.isValidProperty this.source do (
+    --   this.source.StateChanged.Unsubscribe this.SourceChanged
+    --   if isCommand do (
+    --     this.source.CanExecuteChanged.Unsubscribe this.SourceChanged
+    --   )
+    -- )
     ok
   ),
 
@@ -569,8 +591,13 @@ struct MwmBindingStruct (
   */
   private fn updateTargetEnabled = (
     local isEnabled = true
-    if this.isValidCommand this.source do (
+    if this.isValidCommand this.source then (
       isEnabled = this.source.CanExecute()
+    )
+    else (
+      if this.isValidProperty this.source do (
+        isEnabled = this.source.IsEnabled()
+      )
     )
     this.SetTargetEnabled isEnabled
     ok

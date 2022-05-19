@@ -16,24 +16,29 @@
   format "[run %]@\"%\"\n" nowTime currentFile
   /* Setup Start ------------------------------------------------------------ */
   fileIn (pathUtility.GetFullPath @"..\..\definitionPool.ms")
+  local conditionDef = ::mwmDefinitionPool[@"Model\MwmCondition.ms"]
   local modelAttributeDef = ::mwmDefinitionPool[@"Model\MwmModelAttribute.ms"]
 
   local TestModelStruct
   struct TestModelStruct (
     private count = 0,
+    private step = 1,
 
     /*
-    public fn Decrement = (),
+    public fn Decrement subtrahend = (),
     public fn GetCount = (),
-    public fn Increment = (),
+    public fn GetStep = (),
+    public fn Increment addend = (),
     public fn SetCount input = (),
+    public fn SetStep input = (),
     */
 
     /*-
+    @param subtrahend <Integer>
     @returns <OkClass>
     */
-    public fn Decrement = (
-      this.SetCount (this.count - 1)
+    public fn Decrement subtrahend = (
+      this.SetCount (this.count - subtrahend)
       ok
     ),
 
@@ -45,10 +50,18 @@
     ),
 
     /*-
+    @returns <BooleanClass>
+    */
+    public fn GetStep = (
+      this.step
+    ),
+
+    /*-
+    @param addend <Integer>
     @returns <OkClass>
     */
-    public fn Increment = (
-      this.SetCount (this.count + 1)
+    public fn Increment addend = (
+      this.SetCount (this.count + addend)
       ok
     ),
 
@@ -64,6 +77,18 @@
       this.GetCount()
     ),
 
+    /*-
+    @param input <Integer>
+    @returns <Integer>
+    */
+    public fn SetStep input = (
+      if classOf input == Integer do (
+        this.step = input
+        this.StateChanged.Notify #Step this.step
+      )
+      this.GetStep()
+    ),
+
     /*- @returns <Name> */
     public fn StructName = #TestModelStruct,
 
@@ -75,6 +100,7 @@
     public fn Dump indent:"" out:listener = (
       format "%TestModelStruct\n" indent to:out
       format "%  count:%\n" indent this.count to:out
+      format "%  step:%\n" indent this.step to:out
       ok
     ),
 
@@ -92,7 +118,10 @@
       local isEqualProperties = true \
           and isProperty obj #GetCount \
           and classOf obj.GetCount == MAXScriptFunction \
-          and obj.GetCount() == this.GetCount()
+          and obj.GetCount() == this.GetCount() \
+          and isProperty obj #GetStep \
+          and classOf obj.GetStep == MAXScriptFunction \
+          and obj.GetStep() == this.GetStep()
 
       isEqualStructName and isEqualProperties
     ),
@@ -105,6 +134,8 @@
     )
   )
 
+  local expectedEnabledCondition = undefined
+  local expectedIsEnabled = true
   local expectedModel = undefined
   local expectedModelAttribute = undefined
   local expectedPropertyName = undefined
@@ -114,6 +145,16 @@
   fn testNotification type param = (
     -- format "testNotification type:% param:%\n" type param
     case type of (
+      (#EnabledChanged): (
+        actual = ::TestValueStruct (testObj.IsEnabled())
+        expected = ::TestValueStruct expectedIsEnabled
+        assert (actual.Equals expected == true)
+      )
+      (#EnabledCondition): (
+        actual = ::TestValueStruct (testObj.GetEnabledCondition())
+        expected = ::TestValueStruct expectedEnabledCondition
+        assert (actual.Equals expected == true)
+      )
       (#Model): (
         actual = ::TestValueStruct (testObj.GetModel())
         expected = ::TestValueStruct expectedModel
@@ -142,10 +183,19 @@
     ok
   )
 
+  local testEnabledFunction
+  fn testEnabledFunction params = (
+    params[1].Value != 0
+  )
+
   local config = ::std.ConfigStruct()
   local model = TestModelStruct()
-  local modelAttribute = modelAttributeDef #TestModel #Count #GetCount #SetCount
-  local property2 = undefined
+  local countAttribute = modelAttributeDef #TestModel #Count #GetCount #SetCount
+  local stepAttribute = modelAttributeDef #TestModel #Step #GetStep #SetStep
+
+  local dummyEnabledCondition = conditionDef()
+  local enabledCondition = conditionDef testEnabledFunction
+  local stepProperty = undefined
 
   testDef = ::mwmDefinitionPool[@"Model\MwmProperty.ms"]
   /* Setup End -------------------------------------------------------------- */
@@ -153,7 +203,14 @@
   /* Test Start ------------------------------------------------------------- */
   /* 既定値でインスタンス作成 */
   testObj = testDef()
+  testObj.EnabledChanged.Subscribe testNotification
   testObj.StateChanged.Subscribe testNotification
+
+  /* GetEnabledCondition */
+  -- 既定値
+  actual = ::TestValueStruct (testObj.GetEnabledCondition())
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
 
   /* GetModel */
   -- 既定値
@@ -179,6 +236,12 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
+  /* IsEnabled */
+  -- 既定値
+  actual = ::TestValueStruct (testObj.IsEnabled())
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+
   /* Load */
   -- プロパティ名未定義なので失敗
   actual = ::TestValueStruct (testObj.Load config #TestViewModel)
@@ -189,6 +252,13 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
+  /* RaiseEnabledChanged */
+  -- プロパティが使用可能かどうかを判定する条件オブジェクトが未定義なので失敗
+  expectedIsEnabled = true
+  actual = ::TestValueStruct (testObj.RaiseEnabledChanged #ConditionChanged 0)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+
   /* Save */
   -- プロパティ名未定義なので失敗
   actual = ::TestValueStruct (testObj.Save config #TestViewModel)
@@ -196,6 +266,34 @@
   assert (actual.Equals expected == true)
   -- 設定オブジェクトのキーを確認
   actual = ::TestValueStruct (config.HasValue #'TestViewModel.Count')
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+
+  /* SetEnabledCondition */
+  -- 無効な値
+  actual = ::TestValueStruct (testObj.SetEnabledCondition 0)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 成功
+  expectedEnabledCondition = dummyEnabledCondition
+  actual = ::TestValueStruct (testObj.SetEnabledCondition dummyEnabledCondition)
+  expected = ::TestValueStruct expectedEnabledCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (dummyEnabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 成功
+  expectedEnabledCondition = enabledCondition
+  actual = ::TestValueStruct (testObj.SetEnabledCondition enabledCondition)
+  expected = ::TestValueStruct expectedEnabledCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (enabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 通知元の購読解除を確認（dummyEnabledCondition）
+  actual = ::TestValueStruct (dummyEnabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
@@ -225,9 +323,9 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 成功
-  expectedModelAttribute = modelAttribute
+  expectedModelAttribute = countAttribute
   expectedPropertyValue = 0
-  actual = ::TestValueStruct (testObj.SetModelAttribute modelAttribute)
+  actual = ::TestValueStruct (testObj.SetModelAttribute countAttribute)
   expected = ::TestValueStruct expectedModelAttribute
   assert (actual.Equals expected == true)
   -- 通知元の購読を確認（成功）
@@ -324,12 +422,35 @@
 
   -- testObj.Dump()
 
+  /* 全ての購読を解除 */
+  actual = ::TestValueStruct (dummyEnabledCondition.StateChanged.Unsubscribe testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (enabledCondition.StateChanged.Unsubscribe testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 通知元の購読解除を確認
+  actual = ::TestValueStruct (dummyEnabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (enabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- 数を確認
+  actual = ::TestValueStruct (dummyEnabledCondition.StateChanged.Count())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (enabledCondition.StateChanged.Count())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+
   /* 作成パラメータ */
-  testObj = testDef #Count 0 modelAttribute
+  testObj = testDef #Count 0 countAttribute
+  testObj.EnabledChanged.Subscribe testNotification
   testObj.StateChanged.Subscribe testNotification
   -- GetModelAttribute
   actual = ::TestValueStruct (testObj.GetModelAttribute())
-  expected = ::TestValueStruct modelAttribute
+  expected = ::TestValueStruct countAttribute
   assert (actual.Equals expected == true)
   -- GetPropertyName
   actual = ::TestValueStruct (testObj.GetPropertyName())
@@ -340,43 +461,82 @@
   expected = ::TestValueStruct 0
   assert (actual.Equals expected == true)
 
-  /* SetPropertyValue */
-  -- 成功
-  expectedPropertyValue = 33
-  actual = ::TestValueStruct (testObj.SetPropertyValue 33)
-  expected = ::TestValueStruct ok
-  assert (actual.Equals expected == true)
-  -- モデルの値を確認
-  actual = ::TestValueStruct (model.GetCount())
-  expected = ::TestValueStruct 0
-  assert (actual.Equals expected == true)
-
-  /* SetModel */
-  -- 成功
-  expectedModel = model
-  expectedPropertyValue = 0
-  actual = ::TestValueStruct (testObj.SetModel model)
-  expected = ::TestValueStruct expectedModel
-  assert (actual.Equals expected == true)
-  -- 通知元の購読を確認（成功）
-  actual = ::TestValueStruct (model.StateChanged.HasSubscribed testObj.SynchronizeWithModel)
-  expected = ::TestValueStruct true
-  assert (actual.Equals expected == true)
-  -- プロパティ値を確認（モデルと同期される）
-  actual = ::TestValueStruct (testObj.GetPropertyValue())
-  expected = ::TestValueStruct expectedPropertyValue
-  assert (actual.Equals expected == true)
-
   /* Equals */
   -- 等しくない
   actual = ::TestValueStruct testObj
   expected = ::TestValueStruct (testDef())
   assert (actual.Equals expected == false)
   -- 等しい
-  property2 = testDef #Count 0 modelAttribute
-  property2.SetModel model
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct property2
+  expected = ::TestValueStruct (testDef #Count 0 countAttribute)
+  assert (actual.Equals expected == true)
+
+  /* Enabledをテスト */
+  -- オブジェクトを初期化
+  model = TestModelStruct()
+  enabledCondition = conditionDef testEnabledFunction
+  -- stepProperty作成
+  stepProperty = testDef #Step 1 stepAttribute
+  stepProperty.SetModel model
+  enabledCondition.AddProperty stepProperty
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (stepProperty.StateChanged.HasSubscribed enabledCondition.PropertyValueChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- testObj作成
+  testObj = testDef #Count 0 countAttribute
+  testObj.EnabledChanged.Subscribe testNotification
+  testObj.StateChanged.Subscribe testNotification
+  -- SetModel
+  expectedModel = model
+  expectedPropertyValue = 0
+  actual = ::TestValueStruct (testObj.SetModel model)
+  expected = ::TestValueStruct expectedModel
+  assert (actual.Equals expected == true)
+  -- SetEnabledCondition
+  expectedEnabledCondition = enabledCondition
+  actual = ::TestValueStruct (testObj.SetEnabledCondition enabledCondition)
+  expected = ::TestValueStruct expectedEnabledCondition
+  assert (actual.Equals expected == true)
+  -- 通知元の購読を確認
+  actual = ::TestValueStruct (enabledCondition.StateChanged.HasSubscribed testObj.RaiseEnabledChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- modelの状態を確認
+  actual = ::TestValueStruct (model.GetCount())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (model.GetStep())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- プロパティの値を確認
+  actual = ::TestValueStruct (testObj.GetPropertyValue())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (stepProperty.GetPropertyValue())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- IsEnabled
+  actual = ::TestValueStruct (testObj.IsEnabled())
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- stepPropertyの状態を変更
+  expectedIsEnabled = false
+  actual = ::TestValueStruct (stepProperty.SetPropertyValue 0)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- modelの状態を確認
+  actual = ::TestValueStruct (model.GetStep())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  -- stepPropertyの状態を変更
+  expectedIsEnabled = true
+  actual = ::TestValueStruct (stepProperty.SetPropertyValue -1)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- modelの状態を確認
+  actual = ::TestValueStruct (model.GetStep())
+  expected = ::TestValueStruct -1
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()

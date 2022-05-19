@@ -5,21 +5,24 @@
 
 作成パラメータ
 :   ```maxscript
-    ::MwmPropertyStruct propertyName propertyValue [modelAttribute]
+    ::MwmPropertyStruct propertyName [propertyValue] [modelAttribute] [enabledCondition]
     ```
 
 通知
-:   | 通知名            | 通知データ               | タイミング                   |
-    | ----------------- | ------------------------ | ---------------------------- |
-    | `#Model`          | 新たな`model`値          | `model`を設定した後          |
-    | `#ModelAttribute` | 新たな`modelAttribute`値 | `modelAttribute`を設定した後 |
-    | `#PropertyName`   | 新たな`propertyName`値   | `propertyName`を設定した後   |
-    | `#PropertyValue`  | 新たな`propertyValue`値  | `propertyValue`を設定した後  |
+:   | 通知名              | 通知データ                  | タイミング                                  |
+    | ------------------- | --------------------------- | ------------------------------------------- |
+    | `#EnabledChanged`   | `IsEnabled`メソッドの戻り値 | `RaiseEnabledChanged`メソッドが呼ばれた直後 |
+    | `#EnabledCondition` | 新たな`enabledCondition`値  | `enabledCondition`を設定した後              |
+    | `#Model`            | 新たな`model`値             | `model`を設定した後                         |
+    | `#ModelAttribute`   | 新たな`modelAttribute`値    | `modelAttribute`を設定した後                |
+    | `#PropertyName`     | 新たな`propertyName`値      | `propertyName`を設定した後                  |
+    | `#PropertyValue`    | 新たな`propertyValue`値     | `propertyValue`を設定した後                 |
 
 オブザーバ
-:   | 購読先                                        | メソッド               |
-    | --------------------------------------------- | ---------------------- |
-    | `modelAttribute`で指定した`model`のプロパティ | `SynchronizeWithModel` |
+:   | 購読先                                       | メソッド               |
+    | -------------------------------------------- | ---------------------- |
+    | `enabledCondition`に設定した条件オブジェクト | `RaiseEnabledChanged`  |
+    | `modelAttribute`で指定したモデルオブジェクト | `SynchronizeWithModel` |
 */
 struct MwmPropertyStruct (
   /*- @prop <Name> 作成パラメータ1。プロパティ名。既定値は`undefined`。 */
@@ -28,7 +31,11 @@ struct MwmPropertyStruct (
   public _CP2_,
   /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> 作成パラメータ3。モデル属性。既定値は`undefined`。 */
   public _CP3_,
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> 作成パラメータ4。プロパティが使用可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
+  public _CP4_,
 
+  /*- @prop <Struct:MwmConditionStruct|UndefinedClass> プロパティが使用可能かどうかを判定する条件オブジェクト。既定値は`undefined`。 */
+  private enabledCondition,
   /*- @prop <Struct|UndefinedClass> モデルオブジェクト。既定値は`undefined`。 */
   private model,
   /*- @prop <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。 */
@@ -39,12 +46,16 @@ struct MwmPropertyStruct (
   private propertyValue,
 
   /*
+  public fn GetEnabledCondition = (),
   public fn GetModel = (),
   public fn GetModelAttribute = (),
   public fn GetPropertyName = (),
   public fn GetPropertyValue = (),
+  public fn IsEnabled = (),
   public fn Load config viewModelName = (),
+  public fn RaiseEnabledChanged type param = (),
   public fn Save config viewModelName = (),
+  public fn SetEnabledCondition condition = (),
   public fn SetModel obj = (),
   public fn SetModelAttribute obj = (),
   public fn SetPropertyName input = (),
@@ -55,14 +66,25 @@ struct MwmPropertyStruct (
   private fn getGetterMethod = (),
   private fn getModelObservable = (),
   private fn getSetterMethod = (),
+  private fn isValidCondition obj = (),
   private fn isValidConfig obj = (),
   private fn isValidModel obj = (),
   private fn isValidModelAttribute obj = (),
   private fn isValidObservable obj = (),
+  private fn subscribeEnabledCondition = (),
   private fn subscribeModel = (),
   private fn synchronizePropertyValue getterMethod = (),
+  private fn unsubscribeEnabledCondition = (),
   private fn unsubscribeModel = (),
   */
+
+  /*-
+  プロパティが使用可能かどうかを判定する条件オブジェクトを取得する。
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
+  */
+  public fn GetEnabledCondition = (
+    this.enabledCondition
+  ),
 
   /*-
   モデルオブジェクトを取得する。
@@ -97,6 +119,22 @@ struct MwmPropertyStruct (
   ),
 
   /*-
+  プロパティが使用可能かどうかを判定する。
+  @returns <BooleanClass>
+  @remarks 条件式が真偽値以外を返した場合は`true`を返す。
+  */
+  public fn IsEnabled = (
+    local result = true
+    if this.isValidCondition this.enabledCondition do (
+      result = this.enabledCondition.Evaluate()
+      if classOf result != BooleanClass do (
+        result = true
+      )
+    )
+    result
+  ),
+
+  /*-
   @param config <Struct:ConfigStruct>
   @param viewModelName <Name> ビューモデル名。
   @returns <BooleanClass>
@@ -116,6 +154,22 @@ struct MwmPropertyStruct (
   ),
 
   /*-
+  プロパティが使用可能かどうかの変更通知を発行する。
+  @param type <Name>
+  @param param <Any>
+  @returns <OkClass>
+  */
+  public fn RaiseEnabledChanged type param = (
+    case type of (
+      (#ConditionChanged): (
+        this.EnabledChanged.Notify #EnabledChanged (this.IsEnabled())
+      )
+      default: ()
+    )
+    ok
+  ),
+
+  /*-
   @param config <Struct:ConfigStruct>
   @param viewModelName <Name> ビューモデル名。
   @returns <BooleanClass>
@@ -132,6 +186,22 @@ struct MwmPropertyStruct (
       isSuccessful = true
     )
     isSuccessful
+  ),
+
+  /*-
+  プロパティが使用可能かどうかを判定する条件オブジェクトを設定する。
+  @param condition <Struct:MwmConditionStruct>
+  @returns <Struct:MwmConditionStruct|UndefinedClass>
+  @remarks 無効な値の場合は何もしない。
+  */
+  public fn SetEnabledCondition condition = (
+    if this.isValidCondition condition do (
+      this.unsubscribeEnabledCondition()
+      this.enabledCondition = condition
+      this.subscribeEnabledCondition()
+      this.StateChanged.Notify #EnabledCondition this.enabledCondition
+    )
+    this.GetEnabledCondition()
   ),
 
   /*-
@@ -278,6 +348,17 @@ struct MwmPropertyStruct (
   @param obj <Any>
   @returns <BooleanClass>
   */
+  private fn isValidCondition obj = (
+    isStruct obj \
+        and isProperty obj #StructName \
+        and classOf obj.StructName == MAXScriptFunction \
+        and obj.StructName() == #MwmConditionStruct
+  ),
+
+  /*-
+  @param obj <Any>
+  @returns <BooleanClass>
+  */
   private fn isValidConfig obj = (
     isStruct obj \
         and isProperty obj #StructName \
@@ -316,6 +397,18 @@ struct MwmPropertyStruct (
   ),
 
   /*-
+  プロパティが使用可能かどうかを判定する条件オブジェクトを購読する。
+  @returns <OkClass>
+  */
+  private fn subscribeEnabledCondition = (
+    if this.isValidCondition this.enabledCondition \
+        and this.isValidObservable this.enabledCondition.StateChanged do (
+      this.enabledCondition.StateChanged.Subscribe this.RaiseEnabledChanged
+    )
+    ok
+  ),
+
+  /*-
   モデルを購読する。
   @returns <OkClass>
   */
@@ -336,6 +429,18 @@ struct MwmPropertyStruct (
     if classOf getterMethod == MAXScriptFunction do (
       this.propertyValue = getterMethod()
       this.StateChanged.Notify #PropertyValue this.propertyValue
+    )
+    ok
+  ),
+
+  /*-
+  プロパティが使用可能かどうかを判定する条件オブジェクトの購読を解除する。
+  @returns <OkClass>
+  */
+  private fn unsubscribeEnabledCondition = (
+    if this.isValidCondition this.enabledCondition \
+        and this.isValidObservable this.enabledCondition.StateChanged do (
+      this.enabledCondition.StateChanged.Unsubscribe this.RaiseEnabledChanged
     )
     ok
   ),
@@ -362,6 +467,13 @@ struct MwmPropertyStruct (
   */
   public fn Dump indent:"" out:listener = (
     format "%MwmPropertyStruct\n" indent to:out
+    if this.isValidCondition this.enabledCondition then (
+      format "%  enabledCondition:\n" indent to:out
+      this.enabledCondition.Dump indent:(indent + "    ") out:out
+    )
+    else (
+      format "%  enabledCondition:%\n" indent this.enabledCondition to:out
+    )
     if this.isValidModel this.model \
         and isProperty this.model #StructName \
         and classOf this.model.StructName == MAXScriptFunction \
@@ -412,6 +524,8 @@ struct MwmPropertyStruct (
         and obj.StructName() == this.StructName()
 
     local isEqualProperties = true \
+        and isProperty obj #GetEnabledCondition \
+        and classOf obj.GetEnabledCondition == MAXScriptFunction \
         and isProperty obj #GetModel \
         and classOf obj.GetModel == MAXScriptFunction \
         and isProperty obj #GetModelAttribute \
@@ -421,6 +535,17 @@ struct MwmPropertyStruct (
         and obj.GetPropertyName() == this.GetPropertyName() \
         and isProperty obj #GetPropertyValue \
         and classOf obj.GetPropertyValue == MAXScriptFunction
+
+    if isEqualProperties do (
+      local ov = obj.GetEnabledCondition()
+      local tv = this.GetEnabledCondition()
+      if this.isValidCondition tv then (
+        isEqualProperties = tv.Equals ov
+      )
+      else (
+        isEqualProperties = ov == tv
+      )
+    )
 
     if isEqualProperties do (
       local ov = obj.GetModel()
@@ -463,12 +588,16 @@ struct MwmPropertyStruct (
   ),
 
   /*- @prop <Struct:ObservableStruct> */
+  public EnabledChanged,
+  /*- @prop <Struct:ObservableStruct> */
   public StateChanged,
 
   on Create do (
+    this.EnabledChanged = ::std.ObservableStruct()
     this.StateChanged = ::std.ObservableStruct()
     this.SetPropertyName this._CP1_
     this.SetPropertyValue this._CP2_
     this.SetModelAttribute this._CP3_
+    this.SetEnabledCondition this._CP4_
   )
 )

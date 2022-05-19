@@ -206,6 +206,11 @@
     ok
   )
 
+  local testEnabledFunction
+  fn testEnabledFunction params = (
+    params[1].Value != 0
+  )
+
   local config = ::std.ConfigStruct()
   local converter = converterDef testToTargetFunction testToSourceFunction
   local model = TestModelStruct()
@@ -224,6 +229,10 @@
   executeCondition.AddProperty stepProperty
   local incrementCommand = commandDef #Increment testExecuteFunction \
       modelAttribute executeCondition canExecuteCondition
+
+  local enabledCondition = conditionDef testEnabledFunction
+  enabledCondition.AddProperty stepProperty
+  countProperty.SetEnabledCondition enabledCondition
 
   local countBinding = bindingDef 1 #Count RltTest.Edt #Entered #Text
   countBinding.SetConverter converter

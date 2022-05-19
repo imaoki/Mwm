@@ -223,15 +223,9 @@
     input as String
   )
 
-  local testCanExecuteFunction
-  fn testCanExecuteFunction params = (
+  local testEnabledFunction
+  fn testEnabledFunction params = (
     params[1].Value != 0
-  )
-
-  local testExecuteFunction
-  fn testExecuteFunction model params = (
-    model.Increment params[1].Value
-    ok
   )
 
   local converter = converterDef testToTargetFunction testToSourceFunction
@@ -243,6 +237,10 @@
   countProperty.SetModel model
   local stepProperty = propertyDef #Step 1 stepAttribute
   stepProperty.SetModel model
+
+  local enabledCondition = conditionDef testEnabledFunction
+  enabledCondition.AddProperty stepProperty
+  countProperty.SetEnabledCondition enabledCondition
 
   createDialog RltTest 160 160 \
       style:#(
@@ -377,6 +375,9 @@
   expected = ::TestValueStruct "1"
   assert (actual.Equals expected == true)
   -- `step`プロパティオブジェクトの通知元の購読を確認
+  actual = ::TestValueStruct (stepProperty.EnabledChanged.HasSubscribed testObj.SourceChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
   actual = ::TestValueStruct (stepProperty.StateChanged.HasSubscribed testObj.SourceChanged)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -390,10 +391,16 @@
   expected = ::TestValueStruct "0"
   assert (actual.Equals expected == true)
   -- `count`プロパティオブジェクトの通知元の購読を確認
+  actual = ::TestValueStruct (countProperty.EnabledChanged.HasSubscribed testObj.SourceChanged)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
   actual = ::TestValueStruct (countProperty.StateChanged.HasSubscribed testObj.SourceChanged)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
   -- `step`プロパティオブジェクトの通知元の購読解除を確認
+  actual = ::TestValueStruct (stepProperty.EnabledChanged.HasSubscribed testObj.SourceChanged)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
   actual = ::TestValueStruct (stepProperty.StateChanged.HasSubscribed testObj.SourceChanged)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
@@ -601,6 +608,58 @@
   assert (actual.Equals expected == true)
   actual = ::TestValueStruct RltTest.Edt.Text
   expected = ::TestValueStruct "10"
+  assert (actual.Equals expected == true)
+  -- `step`プロパティオブジェクトの状態を確認
+  actual = ::TestValueStruct (stepProperty.GetPropertyValue())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- モデルの状態を確認
+  actual = ::TestValueStruct (model.GetStep())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- 成功（通知データは使用しない）
+  expectedTargetEnabled = true
+  actual = ::TestValueStruct (testObj.SourceChanged #EnabledChanged false)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct expectedTargetEnabled
+  assert (actual.Equals expected == true)
+  -- 成功（`step`プロパティオブジェクトの状態を変更）
+  expectedTargetEnabled = false
+  actual = ::TestValueStruct (stepProperty.SetPropertyValue 0)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- `step`プロパティオブジェクトの状態を確認
+  actual = ::TestValueStruct (stepProperty.GetPropertyValue())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  -- モデルの状態を確認
+  actual = ::TestValueStruct (model.GetStep())
+  expected = ::TestValueStruct 0
+  assert (actual.Equals expected == true)
+  -- 成功（通知データは使用しない）
+  expectedTargetEnabled = false
+  actual = ::TestValueStruct (testObj.SourceChanged #EnabledChanged true)
+  expected = ::TestValueStruct ok
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct expectedTargetEnabled
+  assert (actual.Equals expected == true)
+  -- 成功（モデルの状態を変更）
+  expectedTargetEnabled = true
+  actual = ::TestValueStruct (model.SetStep 1)
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- `step`プロパティオブジェクトの状態を確認
+  actual = ::TestValueStruct (stepProperty.GetPropertyValue())
+  expected = ::TestValueStruct 1
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct expectedTargetEnabled
   assert (actual.Equals expected == true)
 
   /* TargetChanged */

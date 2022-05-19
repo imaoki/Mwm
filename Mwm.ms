@@ -56,7 +56,7 @@ struct MwmStruct (
   public fn CreateConverter toTargetFunction toSourceFunction = (),
   public fn CreateEvent control eventName params = (),
   public fn CreateModelAttribute modelName propertyName:undefined getterName:undefined setterName:undefined = (),
-  public fn CreateProperty propertyName propertyValue modelAttribute:undefined = (),
+  public fn CreateProperty propertyName propertyValue modelAttribute:undefined enabledCondition:undefined = (),
   public fn CreatePropertyBinding propertyName target targetEventName targetPropertyName = (),
   public fn CreateViewModel viewModelName = (),
   public fn GetConverter converterName = (),
@@ -210,13 +210,14 @@ struct MwmStruct (
   @param propertyName <Name> プロパティ名。
   @param propertyValue <Any> プロパティ値。
   @param modelAttribute: <Struct:MwmModelAttributeStruct|UndefinedClass> モデル属性。既定値は`undefined`。
+  @param enabledCondition: <Struct:MwmConditionStruct|UndefinedClass> プロパティが使用可能かどうかを判定する条件オブジェクト。既定値は`undefined`。
   @returns <Struct:MwmPropertyStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
-  public fn CreateProperty propertyName propertyValue modelAttribute:undefined = (
+  public fn CreateProperty propertyName propertyValue modelAttribute:undefined enabledCondition:undefined = (
     local property = undefined
     if classOf propertyName == Name do (
-      property = this.propertyDef propertyName propertyValue modelAttribute
+      property = this.propertyDef propertyName propertyValue modelAttribute enabledCondition
     )
     property
   ),
@@ -397,7 +398,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "2.1.0",
+  private version = "2.7.0",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,
