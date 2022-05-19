@@ -31,7 +31,7 @@
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 243 29 MwmCommandCode
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 167 29 MwmBindingCode
   definitionPoolMergedCode = mp.ClipText definitionPoolMergedCode 64 -1
-  local code = mp.ReplaceText MwmCode 10747 29 generalConverterCode
+  local code = mp.ReplaceText MwmCode 10779 29 generalConverterCode
   code = mp.ReplaceText code 714 27 definitionPoolMergedCode
 
   /* インストールコード追加 */

@@ -132,7 +132,7 @@ struct MwmStruct (
   /*-
   ターゲットオブジェクトとコマンドとのバインディングを作成する。
   @param commandName <Name> コマンド名。
-  @param target <RolloutClass|RolloutControl> ターゲットオブジェクト。
+  @param target <RolloutClass|RolloutControl|RCMenu|MenuItem> ターゲットオブジェクト。
   @param targetEventName <Name> ターゲットオブジェクトのイベント名。
   @returns <Struct:MwmBindingStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
@@ -174,7 +174,7 @@ struct MwmStruct (
 
   /*-
   イベントを作成する。
-  @param control <RolloutClass|RolloutControl> イベント発生元のロールアウトコントロール。
+  @param control <RolloutClass|RolloutControl|RCMenu|MenuItem> イベント発生元のロールアウトコントロール。
   @param eventName <Name> イベント名。
   @param params <Array[<Any>]|Any> イベントデータ。
   @returns <Struct:MwmEventStruct|UndefinedClass>
