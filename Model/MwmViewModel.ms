@@ -3,7 +3,7 @@
 ビューモデルを定義するための構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmViewModelStruct viewModelName
+    MwmViewModelStruct viewModelName
     ```
 
 通知

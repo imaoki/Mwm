@@ -5,7 +5,7 @@
 
 作成パラメータ
 :   ```maxscript
-    ::MwmPropertyStruct propertyName [propertyValue] [modelAttribute] [enabledCondition]
+    MwmPropertyStruct propertyName [propertyValue] [modelAttribute] [enabledCondition]
     ```
 
 通知

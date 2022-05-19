@@ -3,7 +3,7 @@
 モデル属性を格納する構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmModelAttributeStruct modelName propertyName getterName setterName
+    MwmModelAttributeStruct modelName propertyName getterName setterName
     ```
 
 通知

@@ -3,7 +3,7 @@
 ビューモデルにコマンドを定義するための構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmCommandStruct commandName executeFunction [modelAttribute] [executeCondition] [canExecuteCondition]
+    MwmCommandStruct commandName executeFunction [modelAttribute] [executeCondition] [canExecuteCondition]
     ```
 
 通知

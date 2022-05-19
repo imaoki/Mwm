@@ -3,7 +3,7 @@
 アプリケーションをカプセル化するための構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmApplicationStruct applicationName startupViewName applicationFile
+    MwmApplicationStruct applicationName startupViewName applicationFile
     ```
 
     * アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。

@@ -3,7 +3,7 @@
 値の変換機能を提供する構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmConverterStruct toTargetFunction toSourceFunction
+    MwmConverterStruct toTargetFunction toSourceFunction
     ```
 */
 struct MwmConverterStruct (

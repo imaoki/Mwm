@@ -3,7 +3,7 @@
 プロパティ値の条件式を定義する構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmConditionStruct evaluator
+    MwmConditionStruct evaluator
     ```
 
 通知

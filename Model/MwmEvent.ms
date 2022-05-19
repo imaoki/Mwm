@@ -3,7 +3,7 @@
 ロールアウトコントロールのイベント情報を格納する構造体。
 @remarks 作成パラメータ
 :   ```maxscript
-    ::MwmEventStruct control eventName params
+    MwmEventStruct control eventName params
     ```
 */
 struct MwmEventStruct (
