@@ -68,19 +68,27 @@ Execute `uninstall.ms`.
 ## Usage
 <!-- 使い方 -->
 
-A simple counter application will be used as an example and explained step by step.
-<!-- シンプルなカウンターアプリケーションを例に、順を追って解説する。 -->
+See `Example`.
+<!-- `Example`を参照。 -->
+The following is a step-by-step explanation using a simple counter application as an example.
+<!-- ここではシンプルなカウンターアプリケーションを例に順を追って解説する。 -->
 
 01. [Define Model](#define-model)
     <!-- モデルを定義 -->
 
-02. [Create ViewModel Property](#create-viewmodel-property)
+02. [Create Condition](#create-condition)
+    <!-- 条件を作成 -->
+
+03. [Create ViewModel Property](#create-viewmodel-property)
     <!-- ビューモデルのプロパティを作成 -->
 
-03. [Create ViewModel Command](#create-viewmodel-command)
+04. [Create ViewModel Command](#create-viewmodel-command)
     <!-- ビューモデルのコマンドを作成 -->
 
-04. [Define View](#define-view)
+05. [Set Condition](#set-condition)
+    <!-- 条件を設定 -->
+
+06. [Define View](#define-view)
     <!-- ビューを定義 -->
 
     01. [Define Rollout](#define-rollout)
@@ -89,19 +97,19 @@ A simple counter application will be used as an example and explained step by st
     02. [Data Binding](#data-binding)
         <!-- データバインディング -->
 
-05. [Create View Instance](#create-view-instance)
+07. [Create View Instance](#create-view-instance)
     <!-- ビューインスタンスを作成 -->
 
-06. [Create Model Instance](#create-model-instance)
+08. [Create Model Instance](#create-model-instance)
     <!-- モデルインスタンスを作成 -->
 
-07. [Build ViewModel](#build-viewmodel)
+09. [Build ViewModel](#build-viewmodel)
     <!-- ビューモデルを構築 -->
 
-08. [Build Application](#build-application)
+10. [Build Application](#build-application)
     <!-- アプリケーションを構築 -->
 
-09. [Start Application](#start-application)
+11. [Start Application](#start-application)
     <!-- アプリケーションを開始 -->
 
 ### Define Model
@@ -138,6 +146,9 @@ struct SimpleCounterStruct (
     this.StateChanged = ::std.ObservableStruct()
   )
 )
+(
+  -- ...
+)
 ```
 
 * The property needs a getter and a setter.
@@ -154,11 +165,38 @@ struct SimpleCounterStruct (
   <!-- `StateChanged`は既定の名前で任意に指定可能。 -->
   <!-- 既定以外の名前を使用する場合は`ModelAttribute`にて指定する。 -->
 
+### Create Condition
+<!-- 条件を作成 -->
+
+```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
+(
+  local enabledCondition = ::mwm.CreateCondition evaluator:(
+    fn enabledEvaluator params = (
+      params.Count == 1 and params[1].Name == #Enabled and params[1].Value
+    )
+  )
+  local executeCondition = ::mwm.CreateCondition()
+  -- ...
+)
+```
+
+* Defines the conditions under which a property or command becomes available.
+  <!-- プロパティまたはコマンドが使用可能になる条件を定義する。 -->
+
 ### Create ViewModel Property
 <!-- ビューモデルのプロパティを作成 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
+  local enabledProperty = ::mwm.CreateProperty #Enabled true
+  enabledCondition.AddProperty enabledProperty
   local countProperty = ::mwm.CreateProperty #Count 0 \
       modelAttribute:(
         ::mwm.CreateModelAttribute \
@@ -166,7 +204,10 @@ struct SimpleCounterStruct (
             propertyName:#Count \
             getterName:#GetCount \
             setterName:#SetCount
-      )
+      ) \
+      enabledCondition:enabledCondition
+  executeCondition.AddProperty countProperty
+  -- ...
 )
 ```
 
@@ -185,14 +226,19 @@ struct SimpleCounterStruct (
     countAttribute.SetObservableName #AnyName
 
     local countProperty = ::mwm.CreateProperty #Count 0 \
-        modelAttribute:countAttribute
+        modelAttribute:countAttribute \
+        enabledCondition:enabledCondition
   ```
 
 ### Create ViewModel Command
 <!-- ビューモデルのコマンドを作成 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   local commandAttribute = ::mwm.CreateModelAttribute #SimpleCounter
   local incrementCommand = ::mwm.CreateCommand #Increment \
       executeFunction:(
@@ -201,8 +247,6 @@ struct SimpleCounterStruct (
         )
       ) \
       modelAttribute:commandAttribute
-  incrementCommand.AddExecuteProperty countProperty
-
   local decrementCommand = ::mwm.CreateCommand #Decrement \
       executeFunction:(
         fn executeDecrement model params event = (
@@ -210,12 +254,30 @@ struct SimpleCounterStruct (
         )
       ) \
       modelAttribute:commandAttribute
-  decrementCommand.AddExecuteProperty countProperty
+  -- ...
 )
 ```
 
 * The `ModelAttribute` for the command only needs to specify the model name.
   <!-- コマンド用の`ModelAttribute`はモデル名だけ指定すればよい。 -->
+
+### Set Condition
+<!-- 条件を設定 -->
+
+```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
+(
+  -- ...
+  countProperty.SetEnabledCondition enabledCondition
+  incrementCommand.SetCanExecuteCondition enabledCondition
+  incrementCommand.SetExecuteCondition executeCondition
+  decrementCommand.SetCanExecuteCondition enabledCondition
+  decrementCommand.SetExecuteCondition executeCondition
+  -- ...
+)
+```
 
 ### Define View
 <!-- ビューを定義 -->
@@ -224,17 +286,22 @@ struct SimpleCounterStruct (
 <!-- ロールアウトを定義 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
-  rollout RltMain "Counter" (
+  -- ...
+  rollout RltMain "SimpleCounter" (
     /* Specify the name of the corresponding ViewModel */
     local DataContext = #SimpleCounterViewModel
 
-    editText EdtCounter "Counter"
+    checkBox CkbxEnabled "Enabled"
+    editText EdtCount "Count"
     button BtnIncrement "+"
     button BtnDecrement "-"
 
     /*-
-    @param control <RolloutClass|RolloutControl>
+    @param control <RolloutClass|RolloutControl|RCMenu|MenuItem>
     @param eventName <Name>
     @param params <Array[<Any>]|Any>
     @returns <OkClass>
@@ -255,6 +322,9 @@ struct SimpleCounterStruct (
     fn Initialize obj = (
       if ::mwm.IsValidViewModel obj do (
         DataContext = obj
+
+        /* Data Binding */
+        -- ...
       )
       EventNotify RltMain #Open #()
       ok
@@ -264,10 +334,12 @@ struct SimpleCounterStruct (
     on RltMain Moved v do EventNotify RltMain #Moved #(v)
     on RltMain Resized v do EventNotify RltMain #Resized #(v)
 
-    on EdtCounter Entered v do EventNotify EdtCounter #Entered #(v)
+    on CkbxEnabled Changed v do EventNotify CkbxEnabled #Changed #(v)
+    on EdtCount Entered v do EventNotify EdtCount #Entered #(v)
     on BtnIncrement Pressed do EventNotify BtnIncrement #Pressed #()
     on BtnDecrement Pressed do EventNotify BtnDecrement #Pressed #()
   )
+  -- ...
 )
 ```
 
@@ -302,8 +374,12 @@ struct SimpleCounterStruct (
 <!-- データバインディング -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
-  rollout RltMain "Counter" (
+  -- ...
+  rollout RltMain "SimpleCounter" (
     -- ...
     /*-
     @param obj <Struct:MwmViewModelStruct>
@@ -314,15 +390,13 @@ struct SimpleCounterStruct (
         DataContext = obj
 
         /* Data Binding */
-        local countBinding = ::mwm.CreatePropertyBinding #Count EdtCounter #Entered #Text
-        countBinding.SetConverter (
-          ::mwm.CreateConverter \
-              (fn integerAsString input = input as String) \
-              (fn stringToInteger input = input as Integer)
-        )
+        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Entered #Text
+        countBinding.SetConverter (::mwm.GetConverter #IntegerToString)
+        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Changed #Checked
         local incrementBinding = ::mwm.CreateCommandBinding #Increment BtnIncrement #Pressed
         local decrementBinding = ::mwm.CreateCommandBinding #Decrement BtnDecrement #Pressed
         DataContext.SetBinding countBinding
+        DataContext.SetBinding enabledBinding
         DataContext.SetBinding incrementBinding
         DataContext.SetBinding decrementBinding
       )
@@ -331,6 +405,7 @@ struct SimpleCounterStruct (
     )
     -- ...
   )
+  -- ...
 )
 ```
 
@@ -338,8 +413,13 @@ struct SimpleCounterStruct (
 <!-- ビューインスタンスを作成 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   local view = ::std.DialogStruct RltMain [160, 160]
+  -- ...
 )
 ```
 
@@ -347,8 +427,13 @@ struct SimpleCounterStruct (
 <!-- モデルインスタンスを作成 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   global simpleCounterModel = ::SimpleCounterStruct()
+  -- ...
 )
 ```
 
@@ -359,12 +444,18 @@ struct SimpleCounterStruct (
 <!-- ビューモデルを構築 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   local viewModel = ::mwm.CreateViewModel #SimpleCounterViewModel
   viewModel.AddModel #SimpleCounter ::simpleCounterModel
+  viewModel.AddProperty enabledProperty
   viewModel.AddProperty countProperty
   viewModel.AddCommand incrementCommand
   viewModel.AddCommand decrementCommand
+  -- ...
 )
 ```
 
@@ -372,11 +463,17 @@ struct SimpleCounterStruct (
 <!-- アプリケーションを構築 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
-  global simpleCounterApplication = ::mwm.CreateApplication #CounterApplication #RltMain
+  -- ...
+  global simpleCounterApplication = ::mwm.CreateApplication \
+      #SimpleCounterApplication #RltMain
   ::simpleCounterApplication.AddModel #SimpleCounter ::simpleCounterModel
   ::simpleCounterApplication.AddView view
   ::simpleCounterApplication.AddViewModel viewModel
+  -- ...
 )
 ```
 
@@ -384,7 +481,11 @@ struct SimpleCounterStruct (
 <!-- アプリケーションを開始 -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   ::simpleCounterApplication.Run()
 )
 ```
@@ -431,10 +532,8 @@ struct SimpleCounterStruct (
 <!-- モデルの実装 -->
 
 ```maxscript
-(
 struct SimpleCounterStruct (
   -- ...
-
   /*-
   @param config <Struct:ConfigStruct>
   @returns <BooleanClass>
@@ -478,10 +577,10 @@ struct SimpleCounterStruct (
         and classOf obj.StructName == MAXScriptFunction \
         and obj.StructName() == #ConfigStruct
   ),
-
   -- ...
 )
-
+(
+  -- ...
 )
 ```
 
@@ -492,9 +591,13 @@ struct SimpleCounterStruct (
 <!-- アプリケーションの構築オプション -->
 
 ```maxscript
+struct SimpleCounterStruct (
+  -- ...
+)
 (
+  -- ...
   global simpleCounterApplication = ::mwm.CreateApplication \
-      #CounterApplication #RltMain applicationFile:(getSourceFileName())
+      #SimpleCounterApplication #RltMain applicationFile:(getSourceFileName())
   -- ...
 )
 ```
