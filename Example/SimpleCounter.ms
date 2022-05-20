@@ -206,11 +206,7 @@ struct SimpleCounterStruct (
 
         /* Data Binding */
         local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Entered #Text
-        countBinding.SetConverter (
-          ::mwm.CreateConverter \
-              (fn integerAsString input = input as String) \
-              (fn stringToInteger input = input as Integer)
-        )
+        countBinding.SetConverter (::mwm.GetConverter #IntegerToString)
         local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Changed #Checked
         local incrementBinding = ::mwm.CreateCommandBinding #Increment BtnIncrement #Pressed
         local decrementBinding = ::mwm.CreateCommandBinding #Decrement BtnDecrement #Pressed
