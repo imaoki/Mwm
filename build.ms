@@ -11,7 +11,7 @@
   local MwmCode = mp.ClipFile @".\Mwm.ms" 1 -1
 
   local MwmApplicationCode = mp.ClipFile @".\Model\MwmApplication.ms" 1827 -1
-  local MwmBindingCode = mp.ClipFile @".\Model\MwmBinding.ms" 2203 -1
+  local MwmBindingCode = mp.ClipFile @".\Model\MwmBinding.ms" 2205 -1
   local MwmCommandCode = mp.ClipFile @".\Model\MwmCommand.ms" 1400 -1
   local MwmConditionCode = mp.ClipFile @".\Model\MwmCondition.ms" 849 -1
   local MwmConverterCode = mp.ClipFile @".\Model\MwmConverter.ms" 186 -1
@@ -31,7 +31,7 @@
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 243 29 MwmCommandCode
   definitionPoolMergedCode = mp.ReplaceText definitionPoolMergedCode 167 29 MwmBindingCode
   definitionPoolMergedCode = mp.ClipText definitionPoolMergedCode 64 -1
-  local code = mp.ReplaceText MwmCode 10779 29 generalConverterCode
+  local code = mp.ReplaceText MwmCode 10794 29 generalConverterCode
   code = mp.ReplaceText code 714 27 definitionPoolMergedCode
 
   /* インストールコード追加 */
