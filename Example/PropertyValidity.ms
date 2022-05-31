@@ -51,8 +51,8 @@ Example of switching property validity.
         DataContext = obj
 
         /* Data Binding */
-        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Changed #Checked
-        local textBinding = ::mwm.CreatePropertyBinding 1 #Text EdtText #Entered #Text
+        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Checked #Changed
+        local textBinding = ::mwm.CreatePropertyBinding 1 #Text EdtText #Text #Entered
         DataContext.SetBinding enabledBinding
         DataContext.SetBinding textBinding
       )

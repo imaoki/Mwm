@@ -38,7 +38,7 @@ Example of binding to property.
         DataContext = obj
 
         /* Data Binding */
-        local textBinding = ::mwm.CreatePropertyBinding 1 #Text EdtText #Entered #Text
+        local textBinding = ::mwm.CreatePropertyBinding 1 #Text EdtText #Text #Entered
         DataContext.SetBinding textBinding
       )
       EventNotify RltMain #Open #()

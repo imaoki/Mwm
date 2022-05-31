@@ -77,7 +77,7 @@ struct BindingToModelStruct (
         DataContext = obj
 
         /* Data Binding */
-        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Entered #Text
+        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Text #Entered
         countBinding.SetConverter (::mwm.GetConverter #IntegerToString)
         DataContext.SetBinding countBinding
       )

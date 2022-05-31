@@ -46,7 +46,7 @@ Example of type conversion of binding values.
         -- local countConverter = ::mwm.GetConverter #IntegerToString
 
         /* Data Binding */
-        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCounter #Entered #Text
+        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCounter #Text #Entered
         countBinding.SetConverter countConverter
         DataContext.SetBinding countBinding
       )

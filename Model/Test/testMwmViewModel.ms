@@ -234,9 +234,9 @@
   enabledCondition.AddProperty stepProperty
   countProperty.SetEnabledCondition enabledCondition
 
-  local countBinding = bindingDef 1 #Count RltTest.Edt #Entered #Text
+  local countBinding = bindingDef 1 #Count RltTest.Edt #Text #Entered
   countBinding.SetConverter converter
-  local incrementBinding = bindingDef 1 #Increment RltTest.Btn #Pressed
+  local incrementBinding = bindingDef 1 #Increment RltTest.Btn undefined #Pressed
 
   local viewModel2 = undefined
 

@@ -57,7 +57,7 @@ struct MwmStruct (
   public fn CreateEvent control eventName params = (),
   public fn CreateModelAttribute modelName propertyName:undefined getterName:undefined setterName:undefined = (),
   public fn CreateProperty propertyName propertyValue modelAttribute:undefined enabledCondition:undefined = (),
-  public fn CreatePropertyBinding propertyName target targetEventName targetPropertyName = (),
+  public fn CreatePropertyBinding mode propertyName target targetPropertyName targetEventName = (),
   public fn CreateViewModel viewModelName = (),
   public fn GetConverter converterName = (),
   public fn GetConverterNames = (),
@@ -142,7 +142,7 @@ struct MwmStruct (
     if classOf commandName == Name \
         and this.isValidControl target \
         and classOf targetEventName == Name do (
-      binding = this.bindingDef 1 commandName target targetEventName
+      binding = this.bindingDef 1 commandName target undefined targetEventName
     )
     binding
   ),
@@ -234,19 +234,19 @@ struct MwmStruct (
   | `3` | `OneWayToSource` | ターゲットが変更されるとソースも更新される。                         |
   @param propertyName <Name> プロパティ名。
   @param target <RolloutClass|RolloutControl> ターゲットオブジェクト。
-  @param targetEventName <Name> ターゲットオブジェクトのイベント名。
   @param targetPropertyName <Name> ターゲットオブジェクトのプロパティ名。
+  @param targetEventName <Name> ターゲットオブジェクトのイベント名。
   @returns <Struct:MwmBindingStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
-  public fn CreatePropertyBinding mode propertyName target targetEventName targetPropertyName = (
+  public fn CreatePropertyBinding mode propertyName target targetPropertyName targetEventName = (
     local binding = undefined
     if classOf mode == Integer \
         and classOf propertyName == Name \
         and this.isValidControl target \
         and classOf targetEventName == Name \
         and classOf targetPropertyName == Name do (
-      binding = this.bindingDef mode propertyName target targetEventName targetPropertyName
+      binding = this.bindingDef mode propertyName target targetPropertyName targetEventName
     )
     binding
   ),
@@ -398,7 +398,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "2.7.0",
+  private version = "2.8.0",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,

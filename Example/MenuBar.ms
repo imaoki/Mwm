@@ -99,7 +99,7 @@ Example of menu bar.
         DataContext = obj
 
         /* Data Binding */
-        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Changed #Checked
+        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Checked #Changed
         local printBinding = ::mwm.CreateCommandBinding #Print BtnPrint #Pressed
         DataContext.SetBinding enabledBinding
         DataContext.SetBinding printBinding

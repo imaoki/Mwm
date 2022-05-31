@@ -334,23 +334,23 @@
 
   /* CreatePropertyBinding */
   -- 無効な値（バインディングにおけるデータフローの方向）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding #1 0 RltTest.Edt #Entered #Text)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding #1 0 RltTest.Edt #Text #Entered)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（プロパティ名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 0 RltTest.Edt #Entered #Text)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 0 RltTest.Edt #Text #Entered)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（ターゲットオブジェクト）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count 0 #Entered #Text)
-  expected = ::TestValueStruct undefined
-  assert (actual.Equals expected == true)
-  -- 無効な値（ターゲットのイベント名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt 0 #Text)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count 0 #Text #Entered)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 無効な値（ターゲットのプロパティ名）
-  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Entered 0)
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt 0 #Entered)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 無効な値（ターゲットのイベント名）
+  actual = ::TestValueStruct (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Text 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 成功（ロールアウト定義）
@@ -362,7 +362,7 @@
   -- 成功（ロールアウトコントロール）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Entered #Text) \
+    (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Text #Entered) \
     #MwmBindingStruct
   )
   -- 成功（メニュー定義）
@@ -374,7 +374,7 @@
   -- 成功（メニューアイテム）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding 1 #Count MnuTest.Mi #Picked #Checked) \
+    (testObj.CreatePropertyBinding 1 #Count MnuTest.Mi #Checked #Picked) \
     #MwmBindingStruct
   )
 

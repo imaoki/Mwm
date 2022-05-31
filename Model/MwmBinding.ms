@@ -3,7 +3,7 @@
 データバインディングの仕組みを提供する。
 @remarks 作成パラメータ
 :   ```maxscript
-    MwmBindingStruct mode sourceName target targetEventName [targetPropertyName]
+    MwmBindingStruct mode sourceName target [targetPropertyName] [targetEventName]
     ```
 
 通知
@@ -36,9 +36,9 @@ struct MwmBindingStruct (
   public _CP2_,
   /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> 作成パラメータ3。ターゲットオブジェクト。既定値は`undefined`。 */
   public _CP3_,
-  /*- @prop <Name> 作成パラメータ4。ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
+  /*- @prop <Name|UndefinedClass> 作成パラメータ4。ターゲットオブジェクトのプロパティ名。既定値は`undefined`。 */
   public _CP4_,
-  /*- @prop <Name|UndefinedClass> 作成パラメータ5。ターゲットオブジェクトのプロパティ名。既定値は`undefined`。 */
+  /*- @prop <Name|UndefinedClass> 作成パラメータ5。ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
   public _CP5_,
 
   /*- @prop <Struct:MwmConverterStruct> ソース-ターゲット間の値のコンバータ。既定値は`undefined`。 */
@@ -51,7 +51,7 @@ struct MwmBindingStruct (
   private sourceName,
   /*- @prop <RolloutClass|RolloutControl|RCMenu|MenuItem> ターゲットオブジェクト。既定値は`undefined`。 */
   private target,
-  /*- @prop <Name> ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
+  /*- @prop <Name|UndefinedClass> ターゲットオブジェクトのイベント名。既定値は`undefined`。 */
   private targetEventName,
   /*- @prop <Name|UndefinedClass> ターゲットオブジェクトのプロパティ名。既定値は`undefined`。 */
   private targetPropertyName,
@@ -350,12 +350,12 @@ struct MwmBindingStruct (
 
   /*-
   ターゲットオブジェクトのイベント名を設定する。
-  @param input <Name>
+  @param input <Name|UndefinedClass>
   @returns <Name|UndefinedClass>
   @remarks 無効な値の場合は何もしない。
   */
   public fn SetTargetEventName input = (
-    if classOf input == Name do (
+    if classOf input == Name or classOf input == UndefinedClass do (
       this.targetEventName = input
       this.StateChanged.Notify #TargetEventName this.targetEventName
     )
@@ -369,7 +369,7 @@ struct MwmBindingStruct (
   @remarks 無効な値の場合は何もしない。
   */
   public fn SetTargetPropertyName input = (
-    if classOf input == Name do (
+    if classOf input == Name or classOf input == UndefinedClass do (
       this.targetPropertyName = input
       this.Refresh()
       this.StateChanged.Notify #TargetPropertyName this.targetPropertyName
@@ -550,13 +550,6 @@ struct MwmBindingStruct (
         this.source.StateChanged.Subscribe this.SourceChanged
       )
     )
-    -- local isCommand = this.isValidCommand this.source
-    -- if isCommand or this.isValidProperty this.source do (
-    --   this.source.StateChanged.Subscribe this.SourceChanged
-    --   if isCommand do (
-    --     this.source.CanExecuteChanged.Subscribe this.SourceChanged
-    --   )
-    -- )
     ok
   ),
 
@@ -575,13 +568,6 @@ struct MwmBindingStruct (
         this.source.StateChanged.Unsubscribe this.SourceChanged
       )
     )
-    -- local isCommand = this.isValidCommand this.source
-    -- if isCommand or this.isValidProperty this.source do (
-    --   this.source.StateChanged.Unsubscribe this.SourceChanged
-    --   if isCommand do (
-    --     this.source.CanExecuteChanged.Unsubscribe this.SourceChanged
-    --   )
-    -- )
     ok
   ),
 
@@ -709,7 +695,7 @@ struct MwmBindingStruct (
     this.SetMode this._CP1_
     this.SetSourceName this._CP2_
     this.SetTarget this._CP3_
-    this.SetTargetEventName this._CP4_
-    this.SetTargetPropertyName this._CP5_
+    this.SetTargetPropertyName this._CP4_
+    this.SetTargetEventName this._CP5_
   )
 )

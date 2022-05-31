@@ -519,7 +519,17 @@
   actual = ::TestValueStruct (testObj.SetTargetEventName 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功（期待値はコンバータを通した値）
+  -- 成功
+  expectedTargetEventName = #Entered
+  actual = ::TestValueStruct (testObj.SetTargetEventName #Entered)
+  expected = ::TestValueStruct expectedTargetEventName
+  assert (actual.Equals expected == true)
+  -- 成功（未定義）
+  expectedTargetEventName = undefined
+  actual = ::TestValueStruct (testObj.SetTargetEventName undefined)
+  expected = ::TestValueStruct expectedTargetEventName
+  assert (actual.Equals expected == true)
+  -- 成功（再設定）
   expectedTargetEventName = #Entered
   actual = ::TestValueStruct (testObj.SetTargetEventName #Entered)
   expected = ::TestValueStruct expectedTargetEventName
@@ -535,7 +545,35 @@
   actual = ::TestValueStruct (testObj.SetTargetPropertyName 0)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
-  -- 成功（期待値はコンバータを通した値）
+  -- 成功
+  expectedTargetEnabled = true
+  expectedTargetPropertyName = #Text
+  expectedTargetPropertyValue = 10
+  actual = ::TestValueStruct (testObj.SetTargetPropertyName #Text)
+  expected = ::TestValueStruct expectedTargetPropertyName
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct expectedTargetEnabled
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct RltTest.Edt.Text
+  expected = ::TestValueStruct "10"
+  assert (actual.Equals expected == true)
+  -- 成功（未定義）
+  expectedTargetEnabled = true
+  expectedTargetPropertyName = undefined
+  expectedTargetPropertyValue = undefined
+  actual = ::TestValueStruct (testObj.SetTargetPropertyName undefined)
+  expected = ::TestValueStruct expectedTargetPropertyName
+  assert (actual.Equals expected == true)
+  -- ターゲットの状態を確認
+  actual = ::TestValueStruct RltTest.Edt.Enabled
+  expected = ::TestValueStruct expectedTargetEnabled
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct RltTest.Edt.Text
+  expected = ::TestValueStruct "10"
+  assert (actual.Equals expected == true)
+  -- 成功（再設定）
   expectedTargetEnabled = true
   expectedTargetPropertyName = #Text
   expectedTargetPropertyValue = 10
@@ -746,7 +784,7 @@
   assert (actual.Equals expected == true)
 
   /* 作成パラメータ */
-  testObj = testDef 1 #Count RltTest.Edt #Entered #Text
+  testObj = testDef 1 #Count RltTest.Edt #Text #Entered
   testObj.StateChanged.Subscribe testNotification
   -- GetMode
   actual = ::TestValueStruct (testObj.GetMode())
@@ -760,13 +798,13 @@
   actual = ::TestValueStruct (testObj.GetTarget())
   expected = ::TestValueStruct RltTest.Edt
   assert (actual.Equals expected == true)
-  -- GetTargetEventName
-  actual = ::TestValueStruct (testObj.GetTargetEventName())
-  expected = ::TestValueStruct #Entered
-  assert (actual.Equals expected == true)
   -- GetTargetPropertyName
   actual = ::TestValueStruct (testObj.GetTargetPropertyName())
   expected = ::TestValueStruct #Text
+  assert (actual.Equals expected == true)
+  -- GetTargetEventName
+  actual = ::TestValueStruct (testObj.GetTargetEventName())
+  expected = ::TestValueStruct #Entered
   assert (actual.Equals expected == true)
 
   /* Equals */
@@ -776,7 +814,7 @@
   assert (actual.Equals expected == false)
   -- 等しい
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct (testDef 1 #Count RltTest.Edt #Entered #Text)
+  expected = ::TestValueStruct (testDef 1 #Count RltTest.Edt #Text #Entered)
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()
