@@ -3,7 +3,7 @@
 データバインディングの仕組みを提供する。
 @remarks 作成パラメータ
 :   ```maxscript
-    MwmBindingStruct mode sourceName target [targetPropertyName] [targetEventName]
+    MwmBindingStruct mode sourceName target targetPropertyName [targetEventName]
     ```
 
 通知
