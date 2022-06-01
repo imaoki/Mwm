@@ -390,9 +390,9 @@ struct SimpleCounterStruct (
         DataContext = obj
 
         /* Data Binding */
-        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Entered #Text
+        local countBinding = ::mwm.CreatePropertyBinding 1 #Count EdtCount #Text #Entered
         countBinding.SetConverter (::mwm.GetConverter #IntegerToString)
-        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Changed #Checked
+        local enabledBinding = ::mwm.CreatePropertyBinding 1 #Enabled CkbxEnabled #Checked #Changed
         local incrementBinding = ::mwm.CreateCommandBinding #Increment BtnIncrement #Pressed
         local decrementBinding = ::mwm.CreateCommandBinding #Decrement BtnDecrement #Pressed
         DataContext.SetBinding countBinding
