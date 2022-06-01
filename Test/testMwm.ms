@@ -365,16 +365,16 @@
     (testObj.CreatePropertyBinding 1 #Count RltTest.Edt #Text #Entered) \
     #MwmBindingStruct
   )
-  -- 成功（メニュー定義）
+  -- 成功（ロールアウトコントロール単方向）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding 1 #Count MnuTest #Open #Open) \
+    (testObj.CreatePropertyBinding 2 #Count RltTest.Edt #Text undefined) \
     #MwmBindingStruct
   )
   -- 成功（メニューアイテム）
   assert (
     testStructInstance \
-    (testObj.CreatePropertyBinding 1 #Count MnuTest.Mi #Checked #Picked) \
+    (testObj.CreatePropertyBinding 1 #Count MnuTest.Mi #Checked undefined) \
     #MwmBindingStruct
   )
 

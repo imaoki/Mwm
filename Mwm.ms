@@ -234,8 +234,8 @@ struct MwmStruct (
   | `3` | `OneWayToSource` | ターゲットが変更されるとソースも更新される。                         |
   @param propertyName <Name> プロパティ名。
   @param target <RolloutClass|RolloutControl> ターゲットオブジェクト。
-  @param targetPropertyName <Name> ターゲットオブジェクトのプロパティ名。
-  @param targetEventName <Name> ターゲットオブジェクトのイベント名。
+  @param targetPropertyName <Name|UndefinedClass> ターゲットオブジェクトのプロパティ名。
+  @param targetEventName <Name|UndefinedClass> ターゲットオブジェクトのイベント名。
   @returns <Struct:MwmBindingStruct|UndefinedClass>
   @remarks 無効な値の場合は`undefined`を返す。
   */
@@ -244,8 +244,8 @@ struct MwmStruct (
     if classOf mode == Integer \
         and classOf propertyName == Name \
         and this.isValidControl target \
-        and classOf targetEventName == Name \
-        and classOf targetPropertyName == Name do (
+        and (classOf targetPropertyName == Name or classOf targetPropertyName == UndefinedClass) \
+        and (classOf targetEventName == Name or classOf targetEventName == UndefinedClass) do (
       binding = this.bindingDef mode propertyName target targetPropertyName targetEventName
     )
     binding
@@ -398,7 +398,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "2.8.0",
+  private version = "2.8.1",
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,
