@@ -397,8 +397,8 @@ struct MwmStruct (
     superClassOf obj == RolloutControl
   ),
 
-  /*- @prop <String> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = "2.8.1",
+  /*- @prop <Array[<Integer>]> バージョン番号。メジャー、マイナー、パッチの順。 */
+  private version = #(2, 8, 1),
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,
@@ -444,7 +444,7 @@ struct MwmStruct (
   ),
 
   /*-
-  @returns <String>
+  @returns <Array[<Integer>]>
   */
   public fn GetVersion = (
     this.version
