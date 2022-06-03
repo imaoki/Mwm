@@ -115,7 +115,13 @@ struct MwmPropertyStruct (
   @returns <Any>
   */
   public fn GetPropertyValue = (
-    this.propertyValue
+    local getterMethod = this.getGetterMethod()
+    if classOf getterMethod == MAXScriptFunction then (
+      getterMethod()
+    )
+    else (
+      this.propertyValue
+    )
   ),
 
   /*-
