@@ -33,6 +33,13 @@
     | `#Resized` | `#RolloutResized` |
 
     * これらのコマンドは内部的に自動生成される。
+
+ビューに設定された`RCMenu`のイベントを受ける既定のコマンド
+:   | イベント名 | コマンド名  |
+    | ---------- | ----------- |
+    | `#Open`    | `#MenuOpen` |
+
+    * これらのコマンドは内部的に自動生成される。
 */
 struct MwmApplicationStruct (
   /*- @prop <Name> 作成パラメータ1。アプリケーションの名前。既定値は`undefined`。 */
