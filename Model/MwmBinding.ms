@@ -82,6 +82,7 @@ struct MwmBindingStruct (
   public fn SourceChanged type param = (),
   public fn TargetChanged type param = (),
 
+  private fn isTypeEqual actual expected = (),
   private fn isValidCommand obj = (),
   private fn isValidConverter obj = (),
   private fn isValidEvent obj = (),
@@ -382,6 +383,7 @@ struct MwmBindingStruct (
   @param input <Any>
   @returns <Any>
   @remarks ソースがプロパティオブジェクト以外の場合、および入力値とプロパティ値の型が異なる場合は何もしない。
+  ただし`Integer`と`Float`については`Number`として扱うので異なっていても可とする。
   */
   public fn SetTargetPropertyValue input = (
     if this.isValidProperty this.source \
@@ -389,7 +391,7 @@ struct MwmBindingStruct (
         and classOf this.targetPropertyName == Name \
         and isProperty this.target this.targetPropertyName do (
       local targetPropertyValue = getProperty this.target this.targetPropertyName
-      if classOf input == classOf targetPropertyValue do (
+      if this.isTypeEqual input targetPropertyValue do (
         setProperty this.target this.targetPropertyName input
         this.StateChanged.Notify #TargetPropertyValueChanged \
             (getProperty this.target this.targetPropertyName)
@@ -444,6 +446,16 @@ struct MwmBindingStruct (
       default: ()
     )
     ok
+  ),
+
+  /*-
+  @param actual <Any>
+  @param expected <Any>
+  @returns <BooleanClass>
+  */
+  private fn isTypeEqual actual expected = (
+    classOf actual == classOf expected \
+        or (superClassOf expected == Number and superClassOf actual == Number)
   ),
 
   /*-

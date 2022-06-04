@@ -398,7 +398,7 @@ struct MwmStruct (
   ),
 
   /*- @prop <Array[<Integer>]> バージョン番号。メジャー、マイナー、パッチの順。 */
-  private version = #(2, 8, 2),
+  private version = #(2, 8, 3),
 
   /*- @returns <Name> */
   public fn StructName = #MwmStruct,
