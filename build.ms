@@ -10,7 +10,7 @@
   local generalConverterCode = mp.ClipFile @".\generalConverter.ms" 64 -1
   local MwmCode = mp.ClipFile @".\Mwm.ms" 1 -1
 
-  local MwmApplicationCode = mp.ClipFile @".\Model\MwmApplication.ms" 1827 -1
+  local MwmApplicationCode = mp.ClipFile @".\Model\MwmApplication.ms" 1980 -1
   local MwmBindingCode = mp.ClipFile @".\Model\MwmBinding.ms" 2203 -1
   local MwmCommandCode = mp.ClipFile @".\Model\MwmCommand.ms" 1400 -1
   local MwmConditionCode = mp.ClipFile @".\Model\MwmCondition.ms" 849 -1
