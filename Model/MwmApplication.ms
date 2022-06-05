@@ -11,18 +11,20 @@
     * 設定ファイルを作りたくない場合はアプリケーションファイルを未定義にする。
 
 通知
-:   | 通知名                 | 通知データ                                        | タイミング                     |
-    | ---------------------- | ------------------------------------------------- | ------------------------------ |
-    | `#ApplicationFile`     | 新たな`applicationFile`値                         | `applicationFile`を設定した後  |
-    | `#ApplicationName`     | 新たな`applicationName`値                         | `applicationName`を設定した後  |
-    | `#ApplicationRan`      | ビューオブジェクトの`IsDisplayed`メソッドの戻り値 | アプリケーションを開始した直後 |
-    | `#ApplicationShutdown` | ビューオブジェクトの`IsDisplayed`メソッドの戻り値 | アプリケーションを終了した直後 |
-    | `#ConfigRead`          | `undefined`                                       | 設定ファイルを読み込んだ後     |
-    | `#ConfigWrote`         | `undefined`                                       | 設定ファイルを書き込んだ後     |
-    | `#ModelTable`          | 新たな`modelTable`値                              | `modelTable`を設定した後       |
-    | `#StartupViewName`     | 新たな`startupViewName`値                         | `startupViewName`を設定した後  |
-    | `#ViewModelTable`      | 新たな`viewModelTable`値                          | `viewModelTable`を設定した後   |
-    | `#ViewTable`           | 新たな`viewTable`値                               | `viewTable`を設定した後        |
+:   | 通知名                 | 通知データ                | タイミング                     |
+    | ---------------------- | ------------------------- | ------------------------------ |
+    | `#ApplicationFile`     | 新たな`applicationFile`値 | `applicationFile`を設定した後  |
+    | `#ApplicationName`     | 新たな`applicationName`値 | `applicationName`を設定した後  |
+    | `#ApplicationRan`      | `applicationName`値       | アプリケーションを開始した直後 |
+    | `#ApplicationShutdown` | `applicationName`値       | アプリケーションを終了した直後 |
+    | `#ConfigRead`          | `undefined`               | 設定ファイルを読み込んだ後     |
+    | `#ConfigWrote`         | `undefined`               | 設定ファイルを書き込んだ後     |
+    | `#ModelTable`          | 新たな`modelTable`値      | `modelTable`を設定した後       |
+    | `#StartupViewName`     | 新たな`startupViewName`値 | `startupViewName`を設定した後  |
+    | `#ViewClosed`          | 対象のビューオブジェクト  | ビューを閉じた後               |
+    | `#ViewModelTable`      | 新たな`viewModelTable`値  | `viewModelTable`を設定した後   |
+    | `#ViewOpened`          | 対象のビューオブジェクト  | ビューを開いた後               |
+    | `#ViewTable`           | 新たな`viewTable`値       | `viewTable`を設定した後        |
 
 `RolloutClass`のイベントを受ける既定のコマンド
 :   | イベント名 | コマンド名        |
@@ -75,6 +77,7 @@ struct MwmApplicationStruct (
   public fn AddModel modelName obj = (),
   public fn AddView obj = (),
   public fn AddViewModel obj = (),
+  public fn CloseView viewName = (),
   public fn GetApplicationFile = (),
   public fn GetApplicationName = (),
   public fn GetConfig = (),
@@ -85,6 +88,7 @@ struct MwmApplicationStruct (
   public fn HasModel key = (),
   public fn HasView key = (),
   public fn HasViewModel key = (),
+  public fn OpenView viewName = (),
   public fn ReadConfig = (),
   public fn Run = (),
   public fn SetApplicationFile input = (),
@@ -185,6 +189,26 @@ struct MwmApplicationStruct (
       this.StateChanged.Notify #ViewModelTable this.viewModelTable
     )
     this.HasViewModel obj
+  ),
+
+  /*-
+  指定したビューを閉じる。
+  @param viewName <Name> ビュー名。
+  @returns <Struct:DialogStruct|UndefinedClass>
+  @remarks ビューが存在しない場合は`undefined`を返す。
+  */
+  public fn CloseView viewName = (
+    local view = undefined
+    if classOf viewName == Name and hasDictValue this.viewTable viewName do (
+      view = this.viewTable[viewName]
+      if this.isValidView view do (
+        if view.IsDisplayed() do (
+          view.Destroy()
+        )
+        this.StateChanged.Notify #ViewClosed view
+      )
+    )
+    view
   ),
 
   /*-
@@ -311,6 +335,37 @@ struct MwmApplicationStruct (
   ),
 
   /*-
+  指定したビューを開く。
+  @param viewName <Name> ビュー名。
+  @returns <Struct:DialogStruct|UndefinedClass>
+  @remarks ビューが存在しない場合は`undefined`を返す。
+  */
+  public fn OpenView viewName = (
+    local view = undefined
+    if classOf viewName == Name and hasDictValue this.viewTable viewName do (
+      view = this.viewTable[viewName]
+      if this.isValidView view do (
+        local rolloutDef = view.GetRolloutDef()
+        local rolloutViewModel = this.getRolloutViewModel rolloutDef
+        if this.isValidRolloutDef rolloutDef \
+            and this.isValidViewModel rolloutViewModel do (
+          if view.Create() do (
+            rolloutDef.Initialize rolloutViewModel
+            local menuDef = view.GetMenuDef()
+            local menuViewModel = this.getMenuViewModel menuDef
+            if this.isValidMenuDef menuDef \
+                and this.isValidViewModel menuViewModel do (
+              menuDef.Initialize menuViewModel
+            )
+            this.StateChanged.Notify #ViewOpened view
+          )
+        )
+      )
+    )
+    view
+  ),
+
+  /*-
   設定ファイルから設定を読み込む。
   @returns <BooleanClass> 読み込みに成功した場合は`true`、失敗した場合は`false`。
   @remarks アプリケーションファイルのパスが未指定の場合は何もしない。
@@ -350,27 +405,31 @@ struct MwmApplicationStruct (
   */
   public fn Run = (
     this.ReadConfig()
-    if classOf this.startupViewName == Name \
-        and hasDictValue this.viewTable this.startupViewName do (
-      local view = this.viewTable[this.startupViewName]
-      if this.isValidView view do (
-        local rolloutDef = view.GetRolloutDef()
-        local rolloutViewModel = this.getRolloutViewModel rolloutDef
-        if this.isValidRolloutDef rolloutDef \
-            and this.isValidViewModel rolloutViewModel do (
-          if view.Create() do (
-            rolloutDef.Initialize rolloutViewModel
-            local menuDef = view.GetMenuDef()
-            local menuViewModel = this.getMenuViewModel menuDef
-            if this.isValidMenuDef menuDef \
-                and this.isValidViewModel menuViewModel do (
-              menuDef.Initialize menuViewModel
-            )
-            this.StateChanged.Notify #ApplicationRan (view.IsDisplayed())
-          )
-        )
-      )
+    local view = this.OpenView this.startupViewName
+    if this.isValidView view do (
+      this.StateChanged.Notify #ApplicationRan this.applicationName
     )
+    -- if classOf this.startupViewName == Name \
+    --     and hasDictValue this.viewTable this.startupViewName do (
+    --   local view = this.viewTable[this.startupViewName]
+    --   if this.isValidView view do (
+    --     local rolloutDef = view.GetRolloutDef()
+    --     local rolloutViewModel = this.getRolloutViewModel rolloutDef
+    --     if this.isValidRolloutDef rolloutDef \
+    --         and this.isValidViewModel rolloutViewModel do (
+    --       if view.Create() do (
+    --         rolloutDef.Initialize rolloutViewModel
+    --         local menuDef = view.GetMenuDef()
+    --         local menuViewModel = this.getMenuViewModel menuDef
+    --         if this.isValidMenuDef menuDef \
+    --             and this.isValidViewModel menuViewModel do (
+    --           menuDef.Initialize menuViewModel
+    --         )
+    --         this.StateChanged.Notify #ApplicationRan (view.IsDisplayed())
+    --       )
+    --     )
+    --   )
+    -- )
     ok
   ),
 
@@ -421,16 +480,20 @@ struct MwmApplicationStruct (
   @returns <OkClass>
   */
   public fn Shutdown = (
-    if classOf this.startupViewName == Name \
-        and hasDictValue this.viewTable this.startupViewName do (
-      local view = this.viewTable[this.startupViewName]
-      if this.isValidView view do (
-        if view.IsDisplayed() do (
-          view.Destroy()
-        )
-        this.StateChanged.Notify #ApplicationShutdown (view.IsDisplayed())
-      )
+    local view = this.CloseView this.startupViewName
+    if this.isValidView view do (
+      this.StateChanged.Notify #ApplicationShutdown this.applicationName
     )
+    -- if classOf this.startupViewName == Name \
+    --     and hasDictValue this.viewTable this.startupViewName do (
+    --   local view = this.viewTable[this.startupViewName]
+    --   if this.isValidView view do (
+    --     if view.IsDisplayed() do (
+    --       view.Destroy()
+    --     )
+    --     this.StateChanged.Notify #ApplicationShutdown (view.IsDisplayed())
+    --   )
+    -- )
     ok
   ),
 

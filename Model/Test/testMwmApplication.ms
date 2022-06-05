@@ -133,9 +133,9 @@
     )
   )
 
-  local MnuTest
-  rcMenu MnuTest (
-    local DataContext = #TestViewModel
+  local MnuTestMain
+  rcMenu MnuTestMain (
+    local DataContext = #TestMainViewModel
 
     fn IsValidViewModel obj = (
       isStruct obj \
@@ -152,11 +152,47 @@
     )
   )
 
-  local RltTest
-  rollout RltTest "RltTest" (
-    local DataContext = #TestViewModel
+  local RltTestMain
+  rollout RltTestMain "RltTestMain" (
+    local DataContext = #TestMainViewModel
 
-    editText Edt "Count"
+    fn IsValidViewModel obj = (
+      isStruct obj \
+          and isProperty obj #StructName \
+          and classOf obj.StructName == MAXScriptFunction \
+          and obj.StructName() == #MwmViewModelStruct
+    )
+
+    fn Initialize obj = (
+      if IsValidViewModel obj do (
+        DataContext = obj
+      )
+      ok
+    )
+  )
+
+  local MnuTestSub
+  rcMenu MnuTestSub (
+    local DataContext = #TestSubViewModel
+
+    fn IsValidViewModel obj = (
+      isStruct obj \
+          and isProperty obj #StructName \
+          and classOf obj.StructName == MAXScriptFunction \
+          and obj.StructName() == #MwmViewModelStruct
+    )
+
+    fn Initialize obj = (
+      if IsValidViewModel obj do (
+        DataContext = obj
+      )
+      ok
+    )
+  )
+
+  local RltTestSub
+  rollout RltTestSub "RltTestSub" (
+    local DataContext = #TestSubViewModel
 
     fn IsValidViewModel obj = (
       isStruct obj \
@@ -176,9 +212,9 @@
   local expectedApplicationFile = undefined
   local expectedApplicationName = undefined
   local expectedConfig = undefined
-  local expectedIsDisplayed = false
   local expectedModelTable = undefined
   local expectedStartupViewName = undefined
+  local expectedView = undefined
   local expectedViewModelTable = undefined
   local expectedViewTable = undefined
 
@@ -198,12 +234,12 @@
       )
       (#ApplicationRan): (
         actual = ::TestValueStruct param
-        expected = ::TestValueStruct expectedIsDisplayed
+        expected = ::TestValueStruct expectedApplicationName
         assert (actual.Equals expected == true)
       )
       (#ApplicationShutdown): (
         actual = ::TestValueStruct param
-        expected = ::TestValueStruct expectedIsDisplayed
+        expected = ::TestValueStruct expectedApplicationName
         assert (actual.Equals expected == true)
       )
       (#ConfigRead): (
@@ -226,9 +262,19 @@
         expected = ::TestValueStruct expectedStartupViewName
         assert (actual.Equals expected == true)
       )
+      (#ViewClosed): (
+        actual = ::TestValueStruct param
+        expected = ::TestValueStruct expectedView
+        assert (actual.Equals expected == true)
+      )
       (#ViewModelTable): (
         actual = ::TestValueStruct param
         expected = ::TestValueStruct expectedViewModelTable
+        assert (actual.Equals expected == true)
+      )
+      (#ViewOpened): (
+        actual = ::TestValueStruct param
+        expected = ::TestValueStruct expectedView
         assert (actual.Equals expected == true)
       )
       (#ViewTable): (
@@ -242,9 +288,12 @@
   )
 
   local model = TestModelStruct()
-  local view = ::std.DialogStruct RltTest
-  view.SetMenuDef MnuTest
-  local viewModel = viewModelDef #TestViewModel
+  local mainView = ::std.DialogStruct RltTestMain
+  mainView.SetMenuDef MnuTestMain
+  local subView = ::std.DialogStruct RltTestSub
+  subView.SetMenuDef MnuTestSub
+  local mainViewModel = viewModelDef #TestMainViewModel
+  local subViewModel = viewModelDef #TestSubViewModel
 
   local testConfigFile = pathUtility.ChangeExtension currentFile ".mxsconfig"
   local testViewConfigTable = Dictionary #Name
@@ -302,13 +351,13 @@
 
   /* GetView */
   -- 既定値
-  actual = ::TestValueStruct (testObj.GetView #RltTest)
+  actual = ::TestValueStruct (testObj.GetView #RltTestMain)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
   /* GetViewModel */
   -- 既定値
-  actual = ::TestValueStruct (testObj.GetViewModel #TestViewModel)
+  actual = ::TestValueStruct (testObj.GetViewModel #TestMainViewModel)
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
 
@@ -320,13 +369,13 @@
 
   /* HasView */
   -- 既定値
-  actual = ::TestValueStruct (testObj.HasView #RltTest)
+  actual = ::TestValueStruct (testObj.HasView #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   /* HasViewModel */
   -- 既定値
-  actual = ::TestValueStruct (testObj.HasViewModel #TestViewModel)
+  actual = ::TestValueStruct (testObj.HasViewModel #TestMainViewModel)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
@@ -382,8 +431,8 @@
   expected = ::TestValueStruct undefined
   assert (actual.Equals expected == true)
   -- 成功
-  expectedStartupViewName = #RltTest
-  actual = ::TestValueStruct (testObj.SetStartupViewName #RltTest)
+  expectedStartupViewName = #RltTestMain
+  actual = ::TestValueStruct (testObj.SetStartupViewName #RltTestMain)
   expected = ::TestValueStruct expectedStartupViewName
   assert (actual.Equals expected == true)
 
@@ -422,59 +471,112 @@
   actual = ::TestValueStruct (testObj.AddView 0)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- 成功
-  expectedViewTable = Dictionary #Name #(#RltTest, view)
-  actual = ::TestValueStruct (testObj.AddView view)
+  -- 成功（メイン）
+  expectedViewTable = Dictionary #Name #(#RltTestMain, mainView)
+  actual = ::TestValueStruct (testObj.AddView mainView)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- ビューモデルの状態を確認
-  actual = ::TestValueStruct (viewModel.HasModel #RltTest)
+  -- ビューモデルの状態を確認（メイン）
+  actual = ::TestValueStruct (mainViewModel.HasModel #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutClose)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutClose)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutMoved)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutMoved)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutOpen)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutOpen)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutResized)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutResized)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutClose #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutClose #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutMoved #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutMoved #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutOpen #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutOpen #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutResized #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutResized #RltTestMain)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- メニューイベントを確認
-  actual = ::TestValueStruct (viewModel.HasCommand #MenuOpen)
+  -- メニューイベントを確認（メイン）
+  actual = ::TestValueStruct (mainViewModel.HasCommand #MenuOpen)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #MenuOpen #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #MenuOpen #RltTestMain)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- 成功（サブ）
+  expectedViewTable = Dictionary #Name #(#RltTestMain, mainView) #(#RltTestSub, subView)
+  actual = ::TestValueStruct (testObj.AddView subView)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- ビューモデルの状態を確認（サブ）
+  actual = ::TestValueStruct (subViewModel.HasModel #RltTestSub)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutClose)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutMoved)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutOpen)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutResized)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutClose #RltTestSub)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutMoved #RltTestSub)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutOpen #RltTestSub)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutResized #RltTestSub)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- メニューイベントを確認（サブ）
+  actual = ::TestValueStruct (subViewModel.HasCommand #MenuOpen)
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #MenuOpen #RltTestSub)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   /* GetView */
-  actual = ::TestValueStruct (testObj.GetView #RltTest)
-  expected = ::TestValueStruct view
+  -- メイン
+  actual = ::TestValueStruct (testObj.GetView #RltTestMain)
+  expected = ::TestValueStruct mainView
+  assert (actual.Equals expected == true)
+  -- サブ
+  actual = ::TestValueStruct (testObj.GetView #RltTestSub)
+  expected = ::TestValueStruct subView
   assert (actual.Equals expected == true)
 
   /* HasView */
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasView view)
+  -- オブジェクト（メイン）
+  actual = ::TestValueStruct (testObj.HasView mainView)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasView #RltTest)
+  -- 名前（メイン）
+  actual = ::TestValueStruct (testObj.HasView #RltTestMain)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- オブジェクト（サブ）
+  actual = ::TestValueStruct (testObj.HasView subView)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 名前（サブ）
+  actual = ::TestValueStruct (testObj.HasView #RltTestSub)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 
@@ -483,59 +585,112 @@
   actual = ::TestValueStruct (testObj.AddViewModel 0)
   expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
-  -- 成功
-  expectedViewModelTable = Dictionary #Name #(#TestViewModel, viewModel)
-  actual = ::TestValueStruct (testObj.AddViewModel viewModel)
+  -- 成功（メイン）
+  expectedViewModelTable = Dictionary #Name #(#TestMainViewModel, mainViewModel)
+  actual = ::TestValueStruct (testObj.AddViewModel mainViewModel)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- ビューモデルの状態を確認
-  actual = ::TestValueStruct (viewModel.HasModel #RltTest)
+  -- ビューモデルの状態を確認（メイン）
+  actual = ::TestValueStruct (mainViewModel.HasModel #RltTestMain)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutClose)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutClose)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutMoved)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutMoved)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutOpen)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutOpen)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasCommand #RolloutResized)
+  actual = ::TestValueStruct (mainViewModel.HasCommand #RolloutResized)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutClose #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutClose #RltTestMain)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutMoved #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutMoved #RltTestMain)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutOpen #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutOpen #RltTestMain)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #RolloutResized #RltTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #RolloutResized #RltTestMain)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- メニューイベントを確認
-  actual = ::TestValueStruct (viewModel.HasCommand #MenuOpen)
+  -- メニューイベントを確認（メイン）
+  actual = ::TestValueStruct (mainViewModel.HasCommand #MenuOpen)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  actual = ::TestValueStruct (viewModel.HasBindingByName #MenuOpen #MnuTest)
+  actual = ::TestValueStruct (mainViewModel.HasBindingByName #MenuOpen #MnuTestMain)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 成功（メイン）
+  expectedViewModelTable = Dictionary #Name #(#TestMainViewModel, mainViewModel) #(#TestSubViewModel, subViewModel)
+  actual = ::TestValueStruct (testObj.AddViewModel subViewModel)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- ビューモデルの状態を確認（メイン）
+  actual = ::TestValueStruct (subViewModel.HasModel #RltTestSub)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutClose)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutMoved)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutOpen)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasCommand #RolloutResized)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutClose #RltTestSub)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutMoved #RltTestSub)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutOpen #RltTestSub)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #RolloutResized #RltTestSub)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- メニューイベントを確認（メイン）
+  actual = ::TestValueStruct (subViewModel.HasCommand #MenuOpen)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  actual = ::TestValueStruct (subViewModel.HasBindingByName #MenuOpen #MnuTestSub)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 
   /* GetViewModel */
-  actual = ::TestValueStruct (testObj.GetViewModel #TestViewModel)
-  expected = ::TestValueStruct viewModel
+  -- メイン
+  actual = ::TestValueStruct (testObj.GetViewModel #TestMainViewModel)
+  expected = ::TestValueStruct mainViewModel
+  assert (actual.Equals expected == true)
+  -- サブ
+  actual = ::TestValueStruct (testObj.GetViewModel #TestSubViewModel)
+  expected = ::TestValueStruct subViewModel
   assert (actual.Equals expected == true)
 
   /* HasViewModel */
-  -- オブジェクト
-  actual = ::TestValueStruct (testObj.HasViewModel viewModel)
+  -- オブジェクト（メイン）
+  actual = ::TestValueStruct (testObj.HasViewModel mainViewModel)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
-  -- 名前
-  actual = ::TestValueStruct (testObj.HasViewModel #TestViewModel)
+  -- 名前（メイン）
+  actual = ::TestValueStruct (testObj.HasViewModel #TestMainViewModel)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- オブジェクト（サブ）
+  actual = ::TestValueStruct (testObj.HasViewModel subViewModel)
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- 名前（サブ）
+  actual = ::TestValueStruct (testObj.HasViewModel #TestSubViewModel)
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 
@@ -543,7 +698,8 @@
   -- 成功
   expectedConfig = ::std.ConfigStruct currentFile
   expectedConfig.AddValue #TestModel (Dictionary #Name #(#Count, 0))
-  expectedConfig.AddValue #'RltTest.Dialog' testViewConfigTable
+  expectedConfig.AddValue #'RltTestMain.Dialog' testViewConfigTable
+  expectedConfig.AddValue #'RltTestSub.Dialog' testViewConfigTable
   actual = ::TestValueStruct (testObj.WriteConfig())
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
@@ -560,7 +716,24 @@
           Dictionary #Name #(#Count, 0)
         ) \
         #(
-          #'RltTest.Dialog',
+          #'RltTestMain.Dialog',
+          Dictionary #Name \
+            #(#InitPosition, undefined) \
+            #(#InitSize, [160, 160]) \
+            #(#LockHeight, false) \
+            #(#LockWidth, false) \
+            #(#Modal, false) \
+            #(#StyleBorder, false) \
+            #(#StyleMaximizeBox, false) \
+            #(#StyleMinimizeBox, false) \
+            #(#StyleResizing, false) \
+            #(#StyleSunkenedge, false) \
+            #(#StyleSysmenu, true) \
+            #(#StyleTitleBar, false) \
+            #(#StyleToolWindow, true)
+        ) \
+        #(
+          #'RltTestSub.Dialog',
           Dictionary #Name \
             #(#InitPosition, undefined) \
             #(#InitSize, [160, 160]) \
@@ -599,67 +772,144 @@
   -- 成功
   expectedConfig = ::std.ConfigStruct currentFile
   expectedConfig.AddValue #TestModel (Dictionary #Name #(#Count, 0))
-  expectedConfig.AddValue #'RltTest.Dialog' testViewConfigTable
+  expectedConfig.AddValue #'RltTestMain.Dialog' testViewConfigTable
+  expectedConfig.AddValue #'RltTestSub.Dialog' testViewConfigTable
   actual = ::TestValueStruct (testObj.ReadConfig())
   expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
 
+  /* OpenView */
+  -- 失敗（無効な値）
+  actual = ::TestValueStruct (testObj.OpenView 0)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 失敗（未登録のビュー名）
+  actual = ::TestValueStruct (testObj.OpenView #Foo)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 成功（メイン）
+  expectedView = mainView
+  actual = ::TestValueStruct (testObj.OpenView #RltTestMain)
+  expected = ::TestValueStruct expectedView
+  assert (actual.Equals expected == true)
+  -- ビューが標示されているかどうかを確認（メイン）
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- ロールアウト定義の`DataContext`変数を確認（メイン）
+  actual = ::TestValueStruct (mainView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct mainViewModel
+  assert (actual.Equals expected == true)
+  -- 成功（サブ）
+  expectedView = subView
+  actual = ::TestValueStruct (testObj.OpenView #RltTestSub)
+  expected = ::TestValueStruct expectedView
+  assert (actual.Equals expected == true)
+  -- ビューが標示されているかどうかを確認（サブ）
+  actual = ::TestValueStruct (subView.IsDisplayed())
+  expected = ::TestValueStruct true
+  assert (actual.Equals expected == true)
+  -- ロールアウト定義の`DataContext`変数を確認（サブ）
+  actual = ::TestValueStruct (subView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct subViewModel
+  assert (actual.Equals expected == true)
+
+  /* CloseView */
+  -- 失敗（無効な値）
+  actual = ::TestValueStruct (testObj.CloseView 0)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 失敗（未登録のビュー名）
+  actual = ::TestValueStruct (testObj.CloseView #Foo)
+  expected = ::TestValueStruct undefined
+  assert (actual.Equals expected == true)
+  -- 成功（メイン）
+  expectedView = mainView
+  actual = ::TestValueStruct (testObj.CloseView #RltTestMain)
+  expected = ::TestValueStruct expectedView
+  assert (actual.Equals expected == true)
+  -- ビューが標示されているかどうかを確認（メイン）
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- ロールアウト定義の`DataContext`変数を確認（メイン）
+  actual = ::TestValueStruct (mainView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct mainViewModel
+  assert (actual.Equals expected == true)
+  -- 成功（サブ）
+  expectedView = subView
+  actual = ::TestValueStruct (testObj.CloseView #RltTestSub)
+  expected = ::TestValueStruct expectedView
+  assert (actual.Equals expected == true)
+  -- ビューが標示されているかどうかを確認（サブ）
+  actual = ::TestValueStruct (subView.IsDisplayed())
+  expected = ::TestValueStruct false
+  assert (actual.Equals expected == true)
+  -- ロールアウト定義の`DataContext`変数を確認（サブ）
+  actual = ::TestValueStruct (subView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct subViewModel
+  assert (actual.Equals expected == true)
+
   /* Run */
   -- 成功
-  expectedIsDisplayed = true
+  expectedApplicationName = #TestApplication
+  expectedView = mainView
   actual = ::TestValueStruct (testObj.Run())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
   -- ビューが標示されているかどうかを確認
-  actual = ::TestValueStruct (view.IsDisplayed())
-  expected = ::TestValueStruct expectedIsDisplayed
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
   -- ロールアウト定義の`DataContext`変数を確認
-  actual = ::TestValueStruct (view.GetRolloutDef()).DataContext
-  expected = ::TestValueStruct viewModel
+  actual = ::TestValueStruct (mainView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct mainViewModel
   assert (actual.Equals expected == true)
 
   /* Shutdown */
   -- 成功
-  expectedIsDisplayed = false
+  expectedApplicationName = #TestApplication
+  expectedView = mainView
   actual = ::TestValueStruct (testObj.Shutdown())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
   -- ビューが標示されているかどうかを確認
-  actual = ::TestValueStruct (view.IsDisplayed())
-  expected = ::TestValueStruct expectedIsDisplayed
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   /* Run */
   -- 成功（再度開始）
-  expectedIsDisplayed = true
+  expectedApplicationName = #TestApplication
+  expectedView = mainView
   actual = ::TestValueStruct (testObj.Run())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
   -- ビューが標示されているかどうかを確認
-  actual = ::TestValueStruct (view.IsDisplayed())
-  expected = ::TestValueStruct expectedIsDisplayed
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct true
   assert (actual.Equals expected == true)
   -- ロールアウト定義の`DataContext`変数を確認
-  actual = ::TestValueStruct (view.GetRolloutDef()).DataContext
-  expected = ::TestValueStruct viewModel
+  actual = ::TestValueStruct (mainView.GetRolloutDef()).DataContext
+  expected = ::TestValueStruct mainViewModel
   assert (actual.Equals expected == true)
 
   /* Shutdown */
   -- 成功（再度終了）
-  expectedIsDisplayed = false
+  expectedApplicationName = #TestApplication
+  expectedView = mainView
   actual = ::TestValueStruct (testObj.Shutdown())
   expected = ::TestValueStruct ok
   assert (actual.Equals expected == true)
   -- ビューが標示されているかどうかを確認
-  actual = ::TestValueStruct (view.IsDisplayed())
-  expected = ::TestValueStruct expectedIsDisplayed
+  actual = ::TestValueStruct (mainView.IsDisplayed())
+  expected = ::TestValueStruct false
   assert (actual.Equals expected == true)
 
   -- testObj.Dump()
 
   /* 作成パラメータ */
-  testObj = testDef #TestApplication #RltTest currentFile
+  testObj = testDef #TestApplication #RltTestMain currentFile
   testObj.StateChanged.Subscribe testNotification
   -- GetApplicationFile
   actual = ::TestValueStruct (testObj.GetApplicationFile())
@@ -675,7 +925,7 @@
   assert (actual.Equals expected == true)
   -- GetStartupViewName
   actual = ::TestValueStruct (testObj.GetStartupViewName())
-  expected = ::TestValueStruct #RltTest
+  expected = ::TestValueStruct #RltTestMain
   assert (actual.Equals expected == true)
 
   /* Equals */
@@ -685,7 +935,7 @@
   assert (actual.Equals expected == false)
   -- 等しい
   actual = ::TestValueStruct testObj
-  expected = ::TestValueStruct (testDef #TestApplication #RltTest currentFile)
+  expected = ::TestValueStruct (testDef #TestApplication #RltTestMain currentFile)
   assert (actual.Equals expected == true)
   /* Test End --------------------------------------------------------------- */
   sw.Stop()
