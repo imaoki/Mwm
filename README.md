@@ -409,6 +409,17 @@ struct SimpleCounterStruct (
 )
 ```
 
+* Converters can be implemented on your own.
+  <!-- コンバータは自前で実装することも可能。 -->
+
+  ```maxscript
+  countBinding.SetConverter (
+    ::mwm.CreateConverter \
+        (fn integerAsString input = input as String) \
+        (fn stringToInteger input = input as Integer)
+  )
+  ```
+
 ### Create View Instance
 <!-- ビューインスタンスを作成 -->
 
@@ -607,6 +618,27 @@ struct SimpleCounterStruct (
 
 * The configuration file path is the one with the application file extension changed to `.mxsconfig`.
   <!-- アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。 -->
+
+### Common converter implementation
+<!-- 共通コンバータの実装 -->
+
+#### Add
+<!-- 追加 -->
+
+```maxscript
+::mwm.AddConverter #IntegerToString (
+  ::mwm.CreateConverter \
+      (fn toTarget input = input as String) \
+      (fn toSource input = input as Integer)
+)
+```
+
+#### Get
+<!-- 取得 -->
+
+```maxscript
+::mwm.GetConverter #IntegerToString
+```
 
 ## License
 <!-- ライセンス -->
