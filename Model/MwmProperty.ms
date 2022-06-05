@@ -268,6 +268,12 @@ struct MwmPropertyStruct (
     local setterMethod = this.getSetterMethod()
     if classOf setterMethod == MAXScriptFunction then (
       setterMethod input
+      /*
+      入力値のフィルタリング等によりモデル側で値が変更されず、
+      結果として`SynchronizeWithModel`が呼ばれない場合があることから、
+      ターゲットへ確実に値を反映するために二重に呼び出している。
+      */
+      this.synchronizePropertyValue (this.getGetterMethod())
     )
     else (
       this.propertyValue = input
@@ -434,6 +440,7 @@ struct MwmPropertyStruct (
   private fn synchronizePropertyValue getterMethod = (
     if classOf getterMethod == MAXScriptFunction do (
       this.propertyValue = getterMethod()
+      -- モデル側でプロパティ値が変更された場合に必要な通知
       this.StateChanged.Notify #PropertyValue this.propertyValue
     )
     ok
