@@ -149,9 +149,22 @@ struct MwmApplicationStruct (
         ```
 
       * ```maxscript
+        fn EventNotify control eventName params = (
+          if ::mwm.IsValidViewModel DataContext do (
+            DataContext.RaiseTargetChanged (
+              ::mwm.CreateEvent control eventName params
+            )
+          )
+          ok
+        )
+        ```
+
+      * ```maxscript
         fn Initialize obj = (
           if ::mwm.IsValidViewModel obj do (
             DataContext = obj
+
+            -- data binding...
           )
           ok
         )
@@ -409,27 +422,6 @@ struct MwmApplicationStruct (
     if this.isValidView view do (
       this.StateChanged.Notify #ApplicationRan this.applicationName
     )
-    -- if classOf this.startupViewName == Name \
-    --     and hasDictValue this.viewTable this.startupViewName do (
-    --   local view = this.viewTable[this.startupViewName]
-    --   if this.isValidView view do (
-    --     local rolloutDef = view.GetRolloutDef()
-    --     local rolloutViewModel = this.getRolloutViewModel rolloutDef
-    --     if this.isValidRolloutDef rolloutDef \
-    --         and this.isValidViewModel rolloutViewModel do (
-    --       if view.Create() do (
-    --         rolloutDef.Initialize rolloutViewModel
-    --         local menuDef = view.GetMenuDef()
-    --         local menuViewModel = this.getMenuViewModel menuDef
-    --         if this.isValidMenuDef menuDef \
-    --             and this.isValidViewModel menuViewModel do (
-    --           menuDef.Initialize menuViewModel
-    --         )
-    --         this.StateChanged.Notify #ApplicationRan (view.IsDisplayed())
-    --       )
-    --     )
-    --   )
-    -- )
     ok
   ),
 
@@ -484,16 +476,6 @@ struct MwmApplicationStruct (
     if this.isValidView view do (
       this.StateChanged.Notify #ApplicationShutdown this.applicationName
     )
-    -- if classOf this.startupViewName == Name \
-    --     and hasDictValue this.viewTable this.startupViewName do (
-    --   local view = this.viewTable[this.startupViewName]
-    --   if this.isValidView view do (
-    --     if view.IsDisplayed() do (
-    --       view.Destroy()
-    --     )
-    --     this.StateChanged.Notify #ApplicationShutdown (view.IsDisplayed())
-    --   )
-    -- )
     ok
   ),
 
@@ -698,6 +680,8 @@ struct MwmApplicationStruct (
           classOf obj.DataContext == Name \
               or this.isValidViewModel obj.DataContext
         ) \
+        and isProperty obj #EventNotify \
+        and classOf obj.EventNotify == MAXScriptFunction \
         and isProperty obj #Initialize \
         and classOf obj.Initialize == MAXScriptFunction
   ),
@@ -721,6 +705,8 @@ struct MwmApplicationStruct (
           classOf obj.DataContext == Name \
               or this.isValidViewModel obj.DataContext
         ) \
+        and isProperty obj #EventNotify \
+        and classOf obj.EventNotify == MAXScriptFunction \
         and isProperty obj #Initialize \
         and classOf obj.Initialize == MAXScriptFunction
   ),

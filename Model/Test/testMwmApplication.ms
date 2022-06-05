@@ -144,6 +144,10 @@
           and obj.StructName() == #MwmViewModelStruct
     )
 
+    fn EventNotify control eventName params = (
+      ok
+    )
+
     fn Initialize obj = (
       if IsValidViewModel obj do (
         DataContext = obj
@@ -161,6 +165,10 @@
           and isProperty obj #StructName \
           and classOf obj.StructName == MAXScriptFunction \
           and obj.StructName() == #MwmViewModelStruct
+    )
+
+    fn EventNotify control eventName params = (
+      ok
     )
 
     fn Initialize obj = (
@@ -182,6 +190,10 @@
           and obj.StructName() == #MwmViewModelStruct
     )
 
+    fn EventNotify control eventName params = (
+      ok
+    )
+
     fn Initialize obj = (
       if IsValidViewModel obj do (
         DataContext = obj
@@ -199,6 +211,10 @@
           and isProperty obj #StructName \
           and classOf obj.StructName == MAXScriptFunction \
           and obj.StructName() == #MwmViewModelStruct
+    )
+
+    fn EventNotify control eventName params = (
+      ok
     )
 
     fn Initialize obj = (
