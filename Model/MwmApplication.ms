@@ -755,6 +755,9 @@ struct MwmApplicationStruct (
   @returns <OkClass>
   */
   private fn onRolloutClose model params event = (
+    if this.isValidView model do (
+      model.RaiseDialogDestroyed()
+    )
     this.WriteConfig()
     ok
   ),
