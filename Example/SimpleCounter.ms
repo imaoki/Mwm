@@ -178,7 +178,7 @@ struct SimpleCounterStruct (
 
     checkBox CkbxEnabled "Enabled"
     editText EdtCount "Count"
-    button BtnIncrement "+"
+    button BtnIncrement "+" across:2
     button BtnDecrement "-"
 
     /*-
