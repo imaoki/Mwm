@@ -3,117 +3,122 @@
 <!-- [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/Mwm)](https://github.com/imaoki/Mwm/releases/latest) -->
 [![GitHub](https://img.shields.io/github/license/imaoki/Mwm)](https://github.com/imaoki/Mwm/blob/main/LICENSE)
 
-MVVM framework.
-<!-- MVVMフレームワーク。 -->
+MVVMフレームワーク。
+<!-- MVVM framework. -->
 
-## Features
-<!-- 特徴 -->
+## 特徴
+<!-- ## Features -->
 
-* ViewModel that can be constructed by commands and properties.
-<!-- コマンドとプロパティによって構築可能なViewModel。 -->
+* コマンドとプロパティによって構築可能なViewModel。
+  <!-- * ViewModel that can be constructed by commands and properties. -->
 
-* Two-way data binding mechanism.
-<!-- 双方向データバインディング機構。 -->
+* 双方向データバインディング機構。
+  <!-- * Two-way data binding mechanism. -->
 
-* Supports configuration files (.mxsconfig).
-<!-- 設定ファイル（.mxsconfig）をサポート。 -->
+* 設定ファイル（.mxsconfig）をサポート。
+  <!-- * Supports configuration files (.mxsconfig). -->
 
-## Examples
-<!-- 例 -->
+## ライセンス
+<!-- ## License -->
 
-## Requirements
-<!-- 要件 -->
+[MIT License](https://github.com/imaoki/Mwm/blob/main/LICENSE)
+
+## 要件
+<!-- ## Requirements -->
 
 * [imaoki/Standard](https://github.com/imaoki/Standard)
 
-## Development Environment
-<!-- 開発環境 -->
+## 開発環境
+<!-- ## Development Environment -->
 
 `3ds Max 2024`
 
-## Install
-<!-- インストールする -->
+## インストール
+<!-- ## Install -->
 
-01. Dependent scripts should be installed beforehand.
-    <!-- 依存スクリプトは予めインストールしておく。 -->
+01. 依存スクリプトは予めインストールしておく。
+    <!-- 01. Dependent scripts should be installed beforehand. -->
 
-02. Execute `install.ms`.
-    <!-- `install.ms`を実行する。 -->
+02. `install.ms`を実行する。
+    <!-- 02. Execute `install.ms`. -->
 
-## Uninstall
-<!-- アンインストールする -->
+## アンインストール
+<!-- ## Uninstall -->
 
-Execute `uninstall.ms`.
-<!-- `uninstall.ms`を実行する。 -->
+`uninstall.ms`を実行する。
+<!-- Execute `uninstall.ms`. -->
 
-## Standalone version
-<!-- スタンドアローン版 -->
+## 単一ファイル版
+<!-- ## Single File Version -->
 
-### Install
-<!-- インストールする -->
+### インストール
+<!-- ### Install -->
 
-01. Dependent scripts should be installed beforehand.
-    <!-- 依存スクリプトは予めインストールしておく。 -->
+01. 依存スクリプトは予めインストールしておく。
+    <!-- 01. Dependent scripts should be installed beforehand. -->
 
-02. Execute `Distribution\Mwm.min.ms`.
-    <!-- `Distribution\Mwm.min.ms`を実行する。 -->
+02. `Distribution\Mwm.min.ms`を実行する。
+    <!-- 02. Execute `Distribution\Mwm.min.ms`. -->
 
-### Uninstall
-<!-- アンインストールする -->
+### アンインストール
+<!-- ### Uninstall -->
 
 ```maxscript
 ::mwm.Uninstall()
 ```
 
-## Usage
-<!-- 使い方 -->
+<!-- ## 例 -->
+<!-- ## Examples -->
 
-See `Example`.
-<!-- `Example`を参照。 -->
-The following is a step-by-step explanation using a simple counter application as an example.
-<!-- ここではシンプルなカウンターアプリケーションを例に順を追って解説する。 -->
+## 使い方
+<!-- ## Usage -->
 
-01. [Define Model](#define-model)
-    <!-- モデルを定義 -->
+`Example`を参照。
+<!-- See `Example`. -->
+ここではシンプルなカウンターアプリケーションを例に順を追って解説する。
+<!-- The following is a step-by-step explanation using a simple counter application as an example. -->
 
-02. [Create Condition](#create-condition)
-    <!-- 条件を作成 -->
+01. [モデルを定義](#モデルを定義)
+    <!-- 01. [Define Model](#define-model) -->
 
-03. [Create ViewModel Property](#create-viewmodel-property)
-    <!-- ビューモデルのプロパティを作成 -->
+02. [条件を作成](#条件を作成)
+    <!-- 02. [Create Condition](#create-condition) -->
 
-04. [Create ViewModel Command](#create-viewmodel-command)
-    <!-- ビューモデルのコマンドを作成 -->
+03. [ビューモデルのプロパティを作成](#ビューモデルのプロパティを作成)
+    <!-- 03. [Create ViewModel Property](#create-viewmodel-property) -->
 
-05. [Set Condition](#set-condition)
-    <!-- 条件を設定 -->
+04. [ビューモデルのコマンドを作成](#ビューモデルのコマンドを作成)
+    <!-- 04. [Create ViewModel Command](#create-viewmodel-command) -->
 
-06. [Define View](#define-view)
-    <!-- ビューを定義 -->
+05. [条件を設定](#条件を設定)
+    <!-- 05. [Set Condition](#set-condition) -->
 
-    01. [Define Rollout](#define-rollout)
-        <!-- ロールアウトを定義 -->
+06. [ビューを定義](#ビューを定義)
+    <!-- 06. [Define View](#define-view) -->
 
-    02. [Data Binding](#data-binding)
-        <!-- データバインディング -->
+    01. [ロールアウトを定義](#ロールアウトを定義)
+        <!-- 01. [Define Rollout](#define-rollout) -->
 
-07. [Create View Instance](#create-view-instance)
-    <!-- ビューインスタンスを作成 -->
+    02. [データバインディング](#データバインディング)
+        <!-- 02. [Data Binding](#data-binding) -->
 
-08. [Create Model Instance](#create-model-instance)
-    <!-- モデルインスタンスを作成 -->
+07. [ビューインスタンスを作成](#ビューインスタンスを作成)
+    <!-- 07. [Create View Instance](#create-view-instance) -->
 
-09. [Build ViewModel](#build-viewmodel)
-    <!-- ビューモデルを構築 -->
+08. [モデルインスタンスを作成](#モデルインスタンスを作成)
+    <!-- 08. [Create Model Instance](#create-model-instance) -->
 
-10. [Build Application](#build-application)
-    <!-- アプリケーションを構築 -->
+09. [ビューモデルを構築](#ビューモデルを構築)
+    <!-- 09. [Build ViewModel](#build-viewmodel) -->
 
-11. [Start Application](#start-application)
-    <!-- アプリケーションを開始 -->
+10. [アプリケーションを構築](#アプリケーションを構築)
+    <!-- 10. [Build Application](#build-application) -->
 
-### Define Model
-<!-- モデルを定義 -->
+11. [アプリケーションを開始](#アプリケーションを開始)
+    <!-- 11. [Start Application](#start-application) -->
+
+### モデルを定義
+<!-- ### Define Model -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -151,22 +156,21 @@ struct SimpleCounterStruct (
 )
 ```
 
-* The property needs a getter and a setter.
-  <!-- プロパティにはゲッターとセッターが必要。 -->
+* プロパティにはゲッターとセッターが必要。
+  <!-- * The property needs a getter and a setter. -->
 
-* The setter takes one argument.
-  <!-- セッターは引数を一つ取る。 -->
+* セッターは引数を一つ取る。
+  <!-- * The setter takes one argument. -->
 
-* Notify state changes with `StateChanged` observable object.
-  <!-- `StateChanged`観察可能オブジェクトで状態変更を通知する。 -->
+* `StateChanged`観察可能オブジェクトで状態変更を通知する。
+  <!-- * Notify state changes with `StateChanged` observable object. -->
+  `StateChanged`は既定の名前で任意に指定可能。
+  <!-- `StateChanged` is the default name and can be specified arbitrarily. -->
+  既定以外の名前を使用する場合は`ModelAttribute`にて指定する。
+  <!-- If a non-default name is used, specify it in `ModelAttribute`. -->
 
-  `StateChanged` is the default name and can be specified arbitrarily.
-  If a non-default name is used, specify it in `ModelAttribute`.
-  <!-- `StateChanged`は既定の名前で任意に指定可能。 -->
-  <!-- 既定以外の名前を使用する場合は`ModelAttribute`にて指定する。 -->
-
-### Create Condition
-<!-- 条件を作成 -->
+### 条件を作成
+<!-- ### Create Condition -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -183,11 +187,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Defines the conditions under which a property or command becomes available.
-  <!-- プロパティまたはコマンドが使用可能になる条件を定義する。 -->
+* プロパティまたはコマンドが使用可能になる条件を定義する。
+  <!-- * Defines the conditions under which a property or command becomes available. -->
 
-### Create ViewModel Property
-<!-- ビューモデルのプロパティを作成 -->
+### ビューモデルのプロパティを作成
+<!-- ### Create ViewModel Property -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -211,11 +215,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Specify `ModelAttribute` when referring to Model properties.
-  <!-- モデルのプロパティを参照する場合は`ModelAttribute`を指定する。 -->
+* モデルのプロパティを参照する場合は`ModelAttribute`を指定する。
+  <!-- * Specify `ModelAttribute` when referring to Model properties. -->
 
-* To change the property name of an observable object from the default
-  <!-- 観察可能オブジェクトのプロパティ名を既定から変更する場合 -->
+* 観察可能オブジェクトのプロパティ名を既定から変更する場合
+  <!-- * To change the property name of an observable object from the default -->
 
   ```maxscript
     local countAttribute = ::mwm.CreateModelAttribute \
@@ -230,8 +234,8 @@ struct SimpleCounterStruct (
         enabledCondition:enabledCondition
   ```
 
-### Create ViewModel Command
-<!-- ビューモデルのコマンドを作成 -->
+### ビューモデルのコマンドを作成
+<!-- ### Create ViewModel Command -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -258,11 +262,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-* The `ModelAttribute` for the command only needs to specify the model name.
-  <!-- コマンド用の`ModelAttribute`はモデル名だけ指定すればよい。 -->
+* コマンド用の`ModelAttribute`はモデル名だけ指定すればよい。
+  <!-- * The `ModelAttribute` for the command only needs to specify the model name. -->
 
-### Set Condition
-<!-- 条件を設定 -->
+### 条件を設定
+<!-- ### Set Condition -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -279,11 +283,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-### Define View
-<!-- ビューを定義 -->
+### ビューを定義
+<!-- ### Define View -->
 
-#### Define Rollout
-<!-- ロールアウトを定義 -->
+#### ロールアウトを定義
+<!-- #### Define Rollout -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -343,35 +347,35 @@ struct SimpleCounterStruct (
 )
 ```
 
-* The following variables and functions must be implemented
-  <!-- 次の変数と関数を必ず実装する。 -->
+* 次の変数と関数を必ず実装する。
+  <!-- * The following variables and functions must be implemented -->
 
-  * Local variable `DataContext`
-    <!-- ローカル変数`DataContext` -->
+  * ローカル変数`DataContext`
+    <!-- * Local variable `DataContext` -->
 
-    * Specify and store ViewModel.
-      <!-- ビューモデルの指定および格納。 -->
+    * ビューモデルの指定および格納。
+      <!-- * Specify and store ViewModel. -->
 
-  * Local function `EventNotify`
-    <!-- ローカル関数`EventNotify` -->
+  * ローカル関数`EventNotify`
+    <!-- * Local function `EventNotify` -->
 
-    * Receives events and notifies the `DataContext` (ViewModel).
-      <!-- イベントを受け取り`DataContext`（ViewModel）に通知する。 -->
+    * イベントを受け取り`DataContext`（ViewModel）に通知する。
+      <!-- * Receives events and notifies the `DataContext` (ViewModel). -->
 
-  * Local function `Initialize`
-    <!-- ローカル関数`Initialize` -->
+  * ローカル関数`Initialize`
+    <!-- * Local function `Initialize` -->
 
-    * Initialize `DataContext`.
-      <!-- `DataContext`を初期化する。 -->
+    * `DataContext`を初期化する。
+      <!-- * Initialize `DataContext`. -->
 
-    * Set up data binding.
-      <!-- データバインディングを設定する。 -->
+    * データバインディングを設定する。
+      <!-- * Set up data binding. -->
 
-    * Notify of `Open` events.
-      <!-- `Open`イベントを通知する。 -->
+    * `Open`イベントを通知する。
+      <!-- * Notify of `Open` events. -->
 
-#### Data Binding
-<!-- データバインディング -->
+#### データバインディング
+<!-- #### Data Binding -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -409,8 +413,8 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Converters can be implemented on your own.
-  <!-- コンバータは自前で実装することも可能。 -->
+* コンバータは自前で実装することも可能。
+  <!-- * Converters can be implemented on your own. -->
 
   ```maxscript
   countBinding.SetConverter (
@@ -420,8 +424,8 @@ struct SimpleCounterStruct (
   )
   ```
 
-### Create View Instance
-<!-- ビューインスタンスを作成 -->
+### ビューインスタンスを作成
+<!-- ### Create View Instance -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -434,8 +438,8 @@ struct SimpleCounterStruct (
 )
 ```
 
-### Create Model Instance
-<!-- モデルインスタンスを作成 -->
+### モデルインスタンスを作成
+<!-- ### Create Model Instance -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -448,11 +452,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Global variable for directly manipulating Model property values to see if they are reflected in the UI.
-  <!-- モデルのプロパティ値を直接操作してUIに反映されるか確認するためのグローバル変数。 -->
+* モデルのプロパティ値を直接操作してUIに反映されるか確認するためのグローバル変数。
+  <!-- * Global variable for directly manipulating Model property values to see if they are reflected in the UI. -->
 
-### Build ViewModel
-<!-- ビューモデルを構築 -->
+### ビューモデルを構築
+<!-- ### Build ViewModel -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -470,8 +474,8 @@ struct SimpleCounterStruct (
 )
 ```
 
-### Build Application
-<!-- アプリケーションを構築 -->
+### アプリケーションを構築
+<!-- ### Build Application -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -488,8 +492,8 @@ struct SimpleCounterStruct (
 )
 ```
 
-### Start Application
-<!-- アプリケーションを開始 -->
+### アプリケーションを開始
+<!-- ### Start Application -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -501,46 +505,46 @@ struct SimpleCounterStruct (
 )
 ```
 
-#### Operation check
-<!-- 動作確認 -->
+#### 動作確認
+<!-- #### Operation check -->
 
-* Do the `+` and `-` buttons change the value?
-  <!-- `+`ボタンと`-`ボタンで数値が変化するか。 -->
+* `+`ボタンと`-`ボタンで数値が変化するか。
+  <!-- * Do the `+` and `-` buttons change the value? -->
 
-* Are the values entered into `EditTextControl` reflected in the Model?
-  <!-- `EditTextControl`に入力した値がModelに反映されるか。 -->
+* `EditTextControl`に入力した値がModelに反映されるか。
+  <!-- * Are the values entered into `EditTextControl` reflected in the Model? -->
 
   ```maxscript
   ::simpleCounterModel.GetCount()
   ```
 
-* Is it reflected in the UI when Model property values are changed directly?
-  <!-- モデルのプロパティ値を直接変更した場合にUIに反映されるか。 -->
+* モデルのプロパティ値を直接変更した場合にUIに反映されるか。
+  <!-- * Is it reflected in the UI when Model property values are changed directly? -->
 
   ```maxscript
   ::simpleCounterModel.SetCount 99
   ```
 
+<!-- ## 制限 -->
 <!-- ## Limitations -->
-<!-- 制限 -->
 
+<!-- * 制限 -->
 <!-- * Limitations -->
-<!-- 制限 -->
 
+<!-- ## 既知の問題 -->
 <!-- ## Known Issues -->
-<!-- 既知の問題 -->
 
+<!-- * 問題 -->
 <!-- * Issue -->
-<!-- 問題 -->
 
-## Additional Information
-<!-- 追加情報 -->
+## 追加情報
+<!-- ## Additional Information -->
 
-### Using configuration files
-<!-- 設定ファイルの使用 -->
+### 設定ファイルの使用
+<!-- ### Using configuration files -->
 
-#### Model Implementation
-<!-- モデルの実装 -->
+#### モデルの実装
+<!-- #### Model Implementation -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -595,11 +599,11 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Implement the `Load` and `Save` methods that take a configuration object ([`<Struct:ConfigStruct>`](https://imaoki.github.io/mxskb/mxsdoc/standard-config.html)) as an argument.
-  <!-- 設定オブジェクト（`<Struct:ConfigStruct>`）を引数に取る`Load`メソッドと`Save`メソッドを実装する。 -->
+* 設定オブジェクト（`<Struct:ConfigStruct>`）を引数に取る`Load`メソッドと`Save`メソッドを実装する。
+  <!-- * Implement the `Load` and `Save` methods that take a configuration object ([`<Struct:ConfigStruct>`](https://imaoki.github.io/mxskb/mxsdoc/standard-config.html)) as an argument. -->
 
-#### Application Build Option
-<!-- アプリケーションの構築オプション -->
+#### アプリケーションの構築オプション
+<!-- #### Application Build Option -->
 
 ```maxscript
 struct SimpleCounterStruct (
@@ -613,17 +617,17 @@ struct SimpleCounterStruct (
 )
 ```
 
-* Specify the filename of the application definition source in the keyword argument `applicationFile`.
-  <!-- キーワード引数`applicationFile`にアプリケーション定義元のファイル名を指定する。 -->
+* キーワード引数`applicationFile`にアプリケーション定義元のファイル名を指定する。
+  <!-- * Specify the filename of the application definition source in the keyword argument `applicationFile`. -->
 
-* The configuration file path is the one with the application file extension changed to `.mxsconfig`.
-  <!-- アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。 -->
+* アプリケーションファイルの拡張子を`.mxsconfig`に変えたものが設定ファイルのパスとなる。
+  <!-- * The configuration file path is the one with the application file extension changed to `.mxsconfig`. -->
 
-### Common converter implementation
-<!-- 共通コンバータの実装 -->
+### 共通コンバータの実装
+<!-- ### Common converter implementation -->
 
-#### Add
-<!-- 追加 -->
+#### 追加
+<!-- #### Add -->
 
 ```maxscript
 ::mwm.AddConverter #IntegerToString (
@@ -633,14 +637,9 @@ struct SimpleCounterStruct (
 )
 ```
 
-#### Get
-<!-- 取得 -->
+#### 取得
+<!-- #### Get -->
 
 ```maxscript
 ::mwm.GetConverter #IntegerToString
 ```
-
-## License
-<!-- ライセンス -->
-
-[MIT License](https://github.com/imaoki/Mwm/blob/main/LICENSE)
